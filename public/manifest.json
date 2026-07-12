@@ -1,0 +1,13 @@
+{
+  "name": "Wellyson Caetano — Software Engineer",
+  "short_name": "Wellyson Caetano",
+  "description": "Portfólio de Wellyson Caetano — sistemas full-stack, automação e produtos em produção.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08080a",
+  "theme_color": "#08080a",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

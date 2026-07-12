@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "@fontsource/geist-sans/800.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+/* Poppins imports re-added once the package is installed (see --font-display) */
+
+@theme {
+  --font-sans: "Geist Sans", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Poppins", "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-canvas: #08080a;
+  --color-canvas-elevated: #0e0e11;
+  --color-surface: #131316;
+  --color-surface-hover: #18181c;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+  --color-foreground: #f5f5f7;
+  --color-foreground-muted: #a1a1aa;
+  --color-foreground-subtle: #86868f;
+
+  --color-accent: #5b6cff;
+  --color-accent-hover: #7385ff;
+  --color-accent-solid: #4655e8;
+  --color-accent-solid-hover: #3a48c9;
+  --color-accent-foreground: #ffffff;
+  --color-accent-soft: rgba(91, 108, 255, 0.12);
+  --color-accent-border: rgba(91, 108, 255, 0.32);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-glass:
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 20px 40px -16px rgba(0, 0, 0, 0.6);
+  --shadow-elevated: 0 24px 60px -24px rgba(0, 0, 0, 0.65);
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-accent-soft);
+  color: var(--color-foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Floating scene animations — About / "how I work" */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-16px) rotate(1deg); }
+}
+@keyframes floatYReverse {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(13px) rotate(-1deg); }
+}
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(7px, -11px); }
+  66% { transform: translate(-6px, 7px); }
+}
+.anim-float { animation: floatY 7s ease-in-out infinite; }
+.anim-float-delayed { animation: floatY 8s ease-in-out infinite 1.2s; }
+.anim-float-slow { animation: floatYReverse 9s ease-in-out infinite 0.5s; }
+.anim-drift { animation: drift 12s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
