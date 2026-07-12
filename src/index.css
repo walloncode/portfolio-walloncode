@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
-@import "@fontsource/geist-sans/400.css";
-@import "@fontsource/geist-sans/500.css";
-@import "@fontsource/geist-sans/600.css";
-@import "@fontsource/geist-sans/700.css";
-@import "@fontsource/geist-sans/800.css";
+@import "@fontsource/sora/400.css";
+@import "@fontsource/sora/500.css";
+@import "@fontsource/sora/600.css";
+@import "@fontsource/sora/700.css";
+@import "@fontsource/sora/800.css";
 @import "@fontsource/geist-mono/400.css";
 @import "@fontsource/geist-mono/500.css";
-/* Poppins imports re-added once the package is installed (see --font-display) */
 
 @theme {
-  --font-sans: "Geist Sans", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Sora", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --font-display: "Poppins", "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --color-canvas: #08080a;
   --color-canvas-elevated: #0e0e11;
@@ -98,6 +97,37 @@ body {
 .anim-float-delayed { animation: floatY 8s ease-in-out infinite 1.2s; }
 .anim-float-slow { animation: floatYReverse 9s ease-in-out infinite 0.5s; }
 .anim-drift { animation: drift 12s ease-in-out infinite; }
+
+/* English — 3D depth panel driven by mousemove parallax.
+   --en-x / --en-y are unitless numbers (~ -9..9) set from the cursor. */
+.en3d-scene {
+  perspective: 1500px;
+}
+.en3d-stage {
+  transform-style: preserve-3d;
+  transform: rotateX(calc(var(--en-y, 0) * -1deg)) rotateY(calc(var(--en-x, 0) * 1deg));
+  transition: transform 350ms var(--ease-out-quart);
+  will-change: transform;
+}
+/* elements that should float above the panel surface */
+.en3d-pop {
+  transform: translateZ(40px);
+}
+.en3d-card {
+  transform-style: preserve-3d;
+  transform: translateZ(34px);
+  transition: transform 350ms var(--ease-out-quart);
+}
+/* deep background blob — drifts slightly WITH the cursor */
+.en3d-card__bg {
+  transform: translateX(calc(var(--en-x, 0) * 0.6px)) translateY(calc(var(--en-y, 0) * -0.6px));
+  transition: transform 200ms ease-out;
+}
+/* foreground subject — drifts AGAINST the cursor and further → reads as closer */
+.en3d-card__fg {
+  transform: translateX(calc(var(--en-x, 0) * -1.1px)) translateY(calc(var(--en-y, 0) * 1.1px));
+  transition: transform 200ms ease-out;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {

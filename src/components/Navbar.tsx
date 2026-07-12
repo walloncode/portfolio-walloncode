@@ -10,6 +10,7 @@ import wallonMark from "@/assets/walloncode-mark.png";
 const NAV_ITEMS = [
   { label: "Trabalho", hash: "work" },
   { label: "Sobre", hash: "about" },
+  { label: "Skills", hash: "skills" },
   { label: "Percurso", hash: "journey" },
   { label: "Inglês", hash: "english" },
   { label: "GitHub", hash: "github" },

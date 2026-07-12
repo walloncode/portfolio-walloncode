@@ -28,12 +28,12 @@ export function Contact() {
             </p>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="mt-3 font-display text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.02em] text-foreground sm:text-[3.75rem] lg:text-[4.5rem]">
+            <h2 className="mt-3 font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[2.5rem] md:text-[3rem]">
               Tem um projeto em mente?
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-5 text-lg text-foreground-muted">
+            <p className="mt-5 text-2xl font-normal leading-relaxed text-foreground-muted">
               Aberto a oportunidades e projetos que exijam engenharia de verdade, não só
               entrega rápida.
             </p>

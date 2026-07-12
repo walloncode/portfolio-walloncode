@@ -132,7 +132,7 @@ export function About() {
                 </div>
 
                 <h2
-                  className="font-display text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[3.75rem] lg:text-[4.5rem]"
+                  className="font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem] md:text-[3rem]"
                   style={{
                     backgroundImage: "linear-gradient(180deg, #ffffff 0%, #a3a3ad 100%)",
                     WebkitBackgroundClip: "text",
@@ -144,7 +144,7 @@ export function About() {
                   Como eu trabalho
                 </h2>
 
-                <p className="mt-6 max-w-md text-lg leading-relaxed text-foreground-muted">
+                <p className="mt-6 max-w-md text-2xl font-normal leading-relaxed text-foreground-muted">
                   Do problema à entrega, cada decisão passa por modelagem, arquitetura e
                   segurança — priorizando o que é auditável sobre o que é mágico.
                 </p>

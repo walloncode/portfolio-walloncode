@@ -78,12 +78,12 @@ export function ProjectPage() {
 
             <motion.h1
               variants={fadeUp}
-              className="mt-4 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl"
+              className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
             >
               {project.title}
             </motion.h1>
 
-            <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-lg text-foreground-muted">
+            <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-2xl font-normal leading-relaxed text-foreground-muted">
               {project.tagline}
             </motion.p>
 

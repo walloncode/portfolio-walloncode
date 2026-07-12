@@ -3,6 +3,7 @@ import { Hero } from "@/components/sections/hero";
 import { ProjectsParallax } from "@/components/sections/projects-parallax";
 import { SelectedWork } from "@/components/sections/selected-work";
 import { About } from "@/components/sections/about";
+import { SkillsSection } from "@/components/sections/skills-section";
 import { JourneySection } from "@/components/sections/journey-section";
 import { EnglishSection } from "@/components/sections/english-section";
 import { GithubSection } from "@/components/sections/github-section";
@@ -28,6 +29,7 @@ export function Home() {
       <ProjectsParallax />
       <SelectedWork />
       <About />
+      <SkillsSection />
       <ScrollAtmosphere>
         <JourneySection />
         <EnglishSection />
