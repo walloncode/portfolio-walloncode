@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fadeUp, staggerContainer } from "@/lib/motion";
+import wallonMark from "@/assets/walloncode-mark.png";
 
 const NAV_ITEMS = [
   { label: "Trabalho", hash: "work" },
@@ -64,11 +65,16 @@ export function Navbar() {
           scrolled ? glass : "border-transparent bg-transparent",
         )}
       >
-        <Link
-          to="/"
-          className="font-mono text-sm font-medium tracking-tight text-foreground transition-colors hover:text-accent-hover"
-        >
-          wellyson.dev
+        <Link to="/" className="group flex items-center gap-2">
+          <img
+            src={wallonMark}
+            alt="WALLONCODE"
+            draggable={false}
+            className="size-7 rounded-full ring-1 ring-accent-border transition-transform duration-300 group-hover:scale-110"
+          />
+          <span className="font-mono text-sm font-medium tracking-tight text-foreground transition-colors group-hover:text-accent-hover">
+            wellyson.dev
+          </span>
         </Link>
 
         <ul className="flex items-center gap-1">
@@ -102,11 +108,16 @@ export function Navbar() {
       >
         <motion.div layout className="flex items-center justify-between gap-3 px-3 py-2">
           {!compact && (
-            <Link
-              to="/"
-              className="whitespace-nowrap pl-1 font-mono text-sm font-medium tracking-tight text-foreground"
-            >
-              wellyson.dev
+            <Link to="/" className="flex items-center gap-2 pl-1">
+              <img
+                src={wallonMark}
+                alt="WALLONCODE"
+                draggable={false}
+                className="size-6 rounded-full ring-1 ring-accent-border"
+              />
+              <span className="whitespace-nowrap font-mono text-sm font-medium tracking-tight text-foreground">
+                wellyson.dev
+              </span>
             </Link>
           )}
           <button

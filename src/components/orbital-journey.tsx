@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ArrowUpRight } from "lucide-react";
 import type { JourneyNode } from "@/content/journey";
 import { cn } from "@/lib/utils";
+import wallonMark from "@/assets/walloncode-mark.png";
 
 /**
  * Interactive orbital map of the journey. Adapted from the radial-orbital
@@ -126,8 +127,13 @@ export function OrbitalJourney({ nodes }: { nodes: JourneyNode[] }) {
             className="absolute h-24 w-24 animate-ping rounded-full border border-accent/15 opacity-50"
             style={{ animationDelay: "0.6s" }}
           />
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-accent-border bg-accent-soft backdrop-blur-md">
-            <span className="font-mono text-sm font-semibold text-accent-hover">W</span>
+          <div className="h-14 w-14 overflow-hidden rounded-full border border-accent-border shadow-[0_0_20px_rgba(91,108,255,0.35)]">
+            <img
+              src={wallonMark}
+              alt="WALLONCODE"
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           </div>
         </div>
 
