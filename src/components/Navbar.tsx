@@ -44,12 +44,20 @@ export function Navbar() {
 
   const goToSection = (hash: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    setOpen(false);
     if (location.pathname !== "/") {
+      setOpen(false);
       navigate(`/#${hash}`);
       return;
     }
-    document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+    // Close the mobile menu first, then scroll on the next tick — running the
+    // smooth scroll in the same synchronous step as setOpen lets the menu's
+    // close/layout animation swallow it, so the page never moves on mobile.
+    setOpen(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+      });
+    });
   };
 
   // shrink the mobile bar once scrolled — until the user opens it again
