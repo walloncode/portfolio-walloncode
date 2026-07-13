@@ -3,10 +3,28 @@ import { ArrowUpRight, Check, Copy, GitBranch } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 import { Button } from "@/components/ui/button";
+import {
+  DiscordIcon,
+  FacebookIcon,
+  GithubIcon,
+  InstagramIcon,
+  WhatsappIcon,
+  YoutubeIcon,
+} from "@/components/ui/brand-icons";
 import { profile } from "@/content/profile";
+
+const socialIcons = {
+  instagram: InstagramIcon,
+  whatsapp: WhatsappIcon,
+  github: GithubIcon,
+  facebook: FacebookIcon,
+  youtube: YoutubeIcon,
+  discord: DiscordIcon,
+} as const;
 
 export function Contact() {
   const [copied, setCopied] = useState(false);
+  const [copiedHandle, setCopiedHandle] = useState<string | null>(null);
 
   const copyEmail = async () => {
     try {
@@ -15,6 +33,16 @@ export function Contact() {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       window.location.href = `mailto:${profile.email}`;
+    }
+  };
+
+  const copyHandle = async (label: string, value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedHandle(label);
+      setTimeout(() => setCopiedHandle((current) => (current === label ? null : current)), 2000);
+    } catch {
+      /* clipboard indisponível — ignora silenciosamente */
     }
   };
 
@@ -51,6 +79,51 @@ export function Contact() {
                   GitHub
                 </a>
               </Button>
+            </div>
+          </Reveal>
+
+          <Reveal delay={0.18}>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              {profile.contactSocials.map((social) => {
+                const Icon = socialIcons[social.icon];
+                const isCopy = "copy" in social;
+                const justCopied = copiedHandle === social.label;
+                const className =
+                  "group inline-flex size-11 items-center justify-center rounded-full border border-border text-foreground-muted transition-colors duration-200 hover:border-accent hover:text-foreground";
+
+                if (isCopy) {
+                  return (
+                    <button
+                      key={social.label}
+                      type="button"
+                      onClick={() => copyHandle(social.label, social.copy)}
+                      className={className}
+                      aria-label={`Copiar ${social.label}: ${social.handle}`}
+                      title={justCopied ? `${social.handle} copiado` : `${social.label} — ${social.handle}`}
+                    >
+                      {justCopied ? (
+                        <Check className="size-5" aria-hidden="true" />
+                      ) : (
+                        <Icon className="size-5" />
+                      )}
+                    </button>
+                  );
+                }
+
+                return (
+                  <a
+                    key={social.label}
+                    href={social.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={className}
+                    aria-label={`${social.label}: ${social.handle}`}
+                    title={`${social.label} — ${social.handle}`}
+                  >
+                    <Icon className="size-5" />
+                  </a>
+                );
+              })}
             </div>
           </Reveal>
 

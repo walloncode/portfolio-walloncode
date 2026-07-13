@@ -27,4 +27,43 @@ export const profile = {
     { label: "GitHub", url: "https://github.com/walloncode" },
     { label: "WKCODE", url: "https://wkcode.com.br" },
   ],
-};
+
+  contactSocials: [
+    {
+      label: "Instagram",
+      handle: "@real.wellc",
+      url: "https://instagram.com/real.wellc",
+      icon: "instagram",
+    },
+    {
+      label: "WhatsApp",
+      handle: "+55 69 99390-0044",
+      url: "https://wa.me/5569993900044",
+      icon: "whatsapp",
+    },
+    {
+      label: "GitHub",
+      handle: "walloncode",
+      url: "https://github.com/walloncode",
+      icon: "github",
+    },
+    {
+      label: "Facebook",
+      handle: "Wellyson da Silva Caetano",
+      url: "https://www.facebook.com/search/top?q=Wellyson%20da%20Silva%20Caetano",
+      icon: "facebook",
+    },
+    {
+      label: "YouTube",
+      handle: "@walloncode",
+      url: "https://www.youtube.com/@walloncode",
+      icon: "youtube",
+    },
+    {
+      label: "Discord",
+      handle: "slowinseven",
+      copy: "slowinseven",
+      icon: "discord",
+    },
+  ],
+} as const;
