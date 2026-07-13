@@ -22,7 +22,7 @@ const THEME_BG: Record<ProjectTheme, string> = {
   signal:
     "radial-gradient(125% 95% at 50% 8%, #062d31 0%, #04141a 52%, var(--color-canvas) 100%)",
   solar:
-    "radial-gradient(115% 90% at 50% 12%, #3a1f06 0%, #180b05 52%, var(--color-canvas) 100%)",
+    "radial-gradient(120% 100% at 50% 16%, #aee0ff 0%, #6fb7ee 34%, #3f8fd6 60%, #245e9e 82%, var(--color-canvas) 100%)",
   shield:
     "radial-gradient(125% 95% at 50% 8%, #2e0b14 0%, #16060a 52%, var(--color-canvas) 100%)",
 };
@@ -77,6 +77,45 @@ const BUBBLES = Array.from({ length: 12 }, (_, i) => {
   const r2 = Math.abs(Math.sin((i + 3) * 91.113) * 43758.5453) % 1;
   return { left: 5 + r * 90, size: 3 + r2 * 6, delay: r2 * 6, dur: 7 + r * 6 };
 });
+
+// Slow-drifting sky clouds for the solar scene. Negative delays offset each
+// cloud so the loop is already in progress on mount (no synchronized start).
+const CLOUDS = [
+  { top: "20%", scale: 1.15, dur: 52, delay: 0, op: 0.92 },
+  { top: "40%", scale: 0.78, dur: 66, delay: -22, op: 0.72 },
+  { top: "12%", scale: 0.62, dur: 58, delay: -38, op: 0.66 },
+  { top: "52%", scale: 0.98, dur: 74, delay: -55, op: 0.8 },
+  { top: "30%", scale: 0.5, dur: 44, delay: -14, op: 0.58 },
+];
+
+// A single cloud built from overlapping soft white puffs.
+function Cloud() {
+  const puffs = [
+    { l: 0, t: 22, s: 62 },
+    { l: 30, t: 2, s: 82 },
+    { l: 70, t: 18, s: 68 },
+    { l: 44, t: 32, s: 58 },
+  ];
+  return (
+    <div className="relative h-20 w-44">
+      {puffs.map((p, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: p.l,
+            top: p.t,
+            width: p.s,
+            height: p.s,
+            background:
+              "radial-gradient(circle at 35% 30%, #ffffff, rgba(255,255,255,0.9) 55%, rgba(232,244,255,0.55) 80%, transparent)",
+            filter: "blur(4px)",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* --------------------------------- scenes --------------------------------- */
 
@@ -326,39 +365,50 @@ function SolarScene({ reduce }: { reduce: boolean | null }) {
         className="absolute left-1/2 top-[16%] h-[52rem] w-[52rem] -translate-x-1/2 -translate-y-1/2"
         style={{
           background:
-            "repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,190,90,0.15) 0deg 2.4deg, transparent 2.4deg 15deg)",
+            "repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,224,130,0.28) 0deg 2.4deg, transparent 2.4deg 15deg)",
           maskImage: "radial-gradient(circle, transparent 12%, black 22%, transparent 60%)",
         }}
         initial={{ opacity: 0, rotate: -20 }}
-        animate={reduce ? { opacity: 0.8, rotate: 0 } : { opacity: 0.8, rotate: 360 }}
+        animate={reduce ? { opacity: 0.85, rotate: 0 } : { opacity: 0.85, rotate: 360 }}
         transition={{
           opacity: { duration: 1.4 },
           rotate: reduce ? { duration: 1.4 } : { duration: 90, repeat: Infinity, ease: "linear" },
         }}
       />
-      {/* the sun core */}
+      {/* the vibrant sun core */}
       <motion.div
-        className="absolute left-1/2 top-[16%] h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[60px]"
-        style={{ background: "radial-gradient(circle, rgba(255,180,70,0.7), rgba(255,120,40,0.25) 45%, transparent 70%)" }}
+        className="absolute left-1/2 top-[16%] h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[55px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(255,252,235,0.98), rgba(255,214,90,0.8) 38%, rgba(255,160,50,0.3) 62%, transparent 74%)",
+        }}
         initial={{ opacity: 0, scale: 0.6 }}
-        animate={reduce ? { opacity: 0.9, scale: 1 } : { opacity: [0.75, 0.95, 0.75], scale: 1 }}
+        animate={reduce ? { opacity: 0.95, scale: 1 } : { opacity: [0.85, 1, 0.85], scale: 1 }}
         transition={{
           opacity: reduce ? { duration: 1.4 } : { duration: 5, repeat: Infinity, ease: "easeInOut" },
           scale: { duration: 1.4, ease: EASE },
         }}
       />
-      {/* warm dust drifting up */}
-      {!reduce &&
-        BUBBLES.slice(0, 9).map((b, i) => (
-          <motion.span
-            key={i}
-            className="absolute rounded-full bg-amber-300/70"
-            style={{ left: `${b.left}%`, top: `${20 + (i % 4) * 12}%`, width: b.size * 0.7, height: b.size * 0.7 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.7, 0], y: [0, -40, -80] }}
-            transition={{ duration: b.dur, delay: b.delay, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
+      {/* drifting sky clouds */}
+      {CLOUDS.map((c, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{ top: c.top, opacity: c.op }}
+          initial={{ x: reduce ? `${8 + i * 18}vw` : "-30vw" }}
+          animate={reduce ? { x: `${8 + i * 18}vw` } : { x: ["-30vw", "125vw"] }}
+          transition={{
+            duration: c.dur,
+            delay: c.delay,
+            repeat: reduce ? 0 : Infinity,
+            ease: "linear",
+          }}
+        >
+          <div style={{ transform: `scale(${c.scale})`, transformOrigin: "left center" }}>
+            <Cloud />
+          </div>
+        </motion.div>
+      ))}
     </>
   );
 }
