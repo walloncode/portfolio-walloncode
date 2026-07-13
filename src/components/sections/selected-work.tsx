@@ -1,10 +1,21 @@
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/section-heading";
-import { ProjectCardStack } from "@/components/project-card-stack";
+import { MorphingCardStack, type MorphCard } from "@/components/ui/morphing-card-stack";
+import { StatusBadge } from "@/components/project-card";
 import { featuredProjects, secondaryProjects } from "@/content/projects";
 
 const orderedProjects = [...featuredProjects, ...secondaryProjects];
+
+const cards: MorphCard[] = orderedProjects.map((p) => ({
+  id: p.slug,
+  title: p.title,
+  description: p.tagline,
+  image: p.image,
+  meta: p.year,
+  href: `/projects/${p.slug}`,
+  badge: <StatusBadge status={p.status} />,
+}));
 
 export function SelectedWork() {
   return (
@@ -19,12 +30,12 @@ export function SelectedWork() {
         </Reveal>
         <Reveal delay={0.05}>
           <p className="mx-auto mb-12 max-w-sm text-center text-sm text-foreground-subtle">
-            Arraste o card, use as setas ou as teclas ← → para navegar.
+            Alterne entre pilha, grade e lista. Na pilha, arraste o card para navegar.
           </p>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <ProjectCardStack projects={orderedProjects} />
+          <MorphingCardStack cards={cards} />
         </Reveal>
       </Container>
     </section>
