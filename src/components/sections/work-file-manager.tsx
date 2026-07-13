@@ -23,41 +23,14 @@ import {
   FileCode2,
 } from "lucide-react";
 import { featuredProjects, secondaryProjects } from "@/content/projects";
-import { MorphingCardStack, type MorphCard } from "@/components/ui/morphing-card-stack";
-import { StatusBadge } from "@/components/project-card";
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-const orderedProjects = [...featuredProjects, ...secondaryProjects];
-
-const projectFiles = orderedProjects.map((p) => ({
+const projectFiles = [...featuredProjects, ...secondaryProjects].map((p) => ({
   name: p.title,
   img: p.image as string | undefined,
   meta: p.year,
 }));
-
-const projectCards: MorphCard[] = orderedProjects.map((p) => ({
-  id: p.slug,
-  title: p.title,
-  description: p.tagline,
-  image: p.image,
-  meta: p.year,
-  href: `/projects/${p.slug}`,
-  badge: <StatusBadge status={p.status} />,
-}));
-
-/** The projects UI that materialises at the end of the portal (and in the
- *  static fallback) — a hint plus the interactive card stack. */
-function ProjectsBoard() {
-  return (
-    <div className="mx-auto w-[min(1180px,92vw)]">
-      <p className="mx-auto mb-8 max-w-sm text-center text-sm text-foreground-subtle">
-        Alterne entre pilha, grade e lista. Na pilha, arraste o card para navegar.
-      </p>
-      <MorphingCardStack cards={projectCards} defaultLayout="stack" />
-    </div>
-  );
-}
 
 interface FolderItem {
   name: string;
@@ -290,7 +263,6 @@ function Finder({ phase, showCursor }: { phase: number; showCursor: boolean }) {
 function FileManagerPortal() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState(0);
-  const [projectsActive, setProjectsActive] = useState(false);
 
   const scrollYProgress = useMotionValue(0);
   useEffect(() => {
@@ -318,29 +290,24 @@ function FileManagerPortal() {
   }, [scrollYProgress]);
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    setPhase(v < 0.24 ? 0 : v < 0.44 ? 1 : 2);
-    setProjectsActive(v > 0.78);
+    setPhase(v < 0.3 ? 0 : v < 0.54 ? 1 : 2);
   });
 
   // Window enters early, holds through the navigation, then fades out.
-  const windowScale = useTransform(scrollYProgress, [0, 0.09, 0.46, 0.56], [0.92, 1, 1, 1.04]);
-  const windowOpacity = useTransform(scrollYProgress, [0, 0.05, 0.48, 0.56], [0, 1, 1, 0]);
-  const windowY = useTransform(scrollYProgress, [0.48, 0.62], ["0vh", "-6vh"]);
+  const windowScale = useTransform(scrollYProgress, [0, 0.1, 0.74, 0.86], [0.92, 1, 1, 1.04]);
+  const windowOpacity = useTransform(scrollYProgress, [0, 0.06, 0.76, 0.86], [0, 1, 1, 0]);
+  const windowY = useTransform(scrollYProgress, [0.76, 1], ["0vh", "-6vh"]);
   const glowOpacity = useTransform(scrollYProgress, [0, 0.3, 0.9], [0.25, 0.5, 0.2]);
 
   // Continuity line — "Quer ver meus trabalhos?" — rises in as the window
-  // clears, then fades as the projects themselves take its place.
-  const introOpacity = useTransform(scrollYProgress, [0.5, 0.58, 0.66, 0.72], [0, 1, 1, 0]);
-  const introY = useTransform(scrollYProgress, [0.5, 0.58, 0.72], [40, 0, -34]);
-
-  // Projects materialise in the very same spot (like the WK pitch) and stay.
-  const projectsOpacity = useTransform(scrollYProgress, [0.68, 0.8], [0, 1]);
-  const projectsY = useTransform(scrollYProgress, [0.68, 0.84], [60, 0]);
+  // clears, then fades out as the projects section scrolls up below.
+  const introOpacity = useTransform(scrollYProgress, [0.78, 0.86, 0.94, 1], [0, 1, 1, 0]);
+  const introY = useTransform(scrollYProgress, [0.78, 0.88, 1], [44, 0, -40]);
 
   const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
 
   return (
-    <section ref={sectionRef} id="work" className="relative h-[360vh]">
+    <section ref={sectionRef} id="work-intro" className="relative h-[320vh]">
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
         {/* ambient glow */}
         <motion.div
@@ -364,14 +331,6 @@ function FileManagerPortal() {
           className="relative z-10 will-change-transform"
         >
           <Finder phase={phase} showCursor />
-        </motion.div>
-
-        {/* projects finale — appears in the same spot the line occupied */}
-        <motion.div
-          style={{ opacity: projectsOpacity, y: projectsY, pointerEvents: projectsActive ? "auto" : "none" }}
-          className="absolute inset-0 z-30 flex items-center justify-center px-4 will-change-transform"
-        >
-          <ProjectsBoard />
         </motion.div>
 
         {/* scroll hint */}
@@ -398,12 +357,9 @@ function FileManagerPortal() {
 /** Calm, non-pinned fallback for reduced-motion users. */
 function FileManagerStatic() {
   return (
-    <section id="work" className="relative py-20">
-      <div className="flex justify-center px-4">
+    <section id="work-intro" className="relative flex min-h-[70vh] items-center justify-center py-20">
+      <div className="px-4">
         <Finder phase={2} showCursor={false} />
-      </div>
-      <div className="mt-16">
-        <ProjectsBoard />
       </div>
     </section>
   );
