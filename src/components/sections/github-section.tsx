@@ -261,7 +261,7 @@ function GithubTabs({ data, active }: { data: MenuData; active: boolean }) {
                   <ExternalImage
                     src={SNAKE_SVG}
                     alt="Animação da cobrinha percorrendo o gráfico de contribuições"
-                    className="h-auto w-full min-w-[520px]"
+                    className="h-auto w-full min-w-0 sm:min-w-[520px]"
                     fallback={
                       <div className="flex h-[120px] items-center justify-center rounded-lg border border-dashed border-border px-4 text-center text-xs text-foreground-subtle">
                         A cobrinha é gerada pelo workflow do repositório e aparece após a
@@ -284,7 +284,7 @@ function GithubTabs({ data, active }: { data: MenuData; active: boolean }) {
                   <ExternalImage
                     src={CONTRIB_CHART}
                     alt="Calendário de contribuições do último ano"
-                    className="h-auto w-full min-w-[560px]"
+                    className="h-auto w-full min-w-0 sm:min-w-[560px]"
                   />
                 </div>
               </div>
@@ -459,10 +459,11 @@ function GithubStatic({ data }: { data: MenuData }) {
 
 export function GithubSection() {
   const reduce = useReducedMotion();
-  const isMobile =
-    typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
   const data = useGithubData();
 
-  if (reduce || isMobile) return <GithubStatic data={data} />;
+  // Only users who ask for reduced motion get the calm, non-pinned fallback.
+  // The zoom portal itself is viewport-agnostic (vmin sizes, fluid menu width),
+  // so it runs on mobile too.
+  if (reduce) return <GithubStatic data={data} />;
   return <GithubPortal data={data} />;
 }
