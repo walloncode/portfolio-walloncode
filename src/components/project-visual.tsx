@@ -6,6 +6,8 @@ const PATTERNS: Record<ProjectTheme, string> = {
     "repeating-radial-gradient(circle at 30% 40%, rgba(255,255,255,0.07) 0, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 14px), repeating-radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 22px)",
   route:
     "repeating-linear-gradient(115deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1.5px, transparent 1.5px, transparent 34px)",
+  diner:
+    "repeating-linear-gradient(45deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 12px, transparent 12px, transparent 24px)",
   grid: "linear-gradient(rgba(255,255,255,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.07) 1px, transparent 1px)",
   signal:
     "repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 24px, rgba(255,255,255,0.07) 25px, transparent 26px)",
