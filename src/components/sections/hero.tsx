@@ -64,7 +64,7 @@ export function Hero() {
   };
 
   const wordClasses =
-    "absolute bottom-[19%] left-0 right-0 select-none px-2 text-center font-sans text-[23vw] font-extrabold leading-[0.8] tracking-[-0.04em] md:text-[16vw] lg:text-[15rem]";
+    "absolute bottom-[19%] left-0 right-0 select-none px-4 text-center font-sans text-[19vw] font-extrabold leading-[0.8] tracking-[-0.04em] sm:text-[20vw] md:text-[16vw] lg:text-[15rem]";
 
   return (
     <section
