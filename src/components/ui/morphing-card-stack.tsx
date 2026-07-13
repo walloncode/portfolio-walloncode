@@ -81,7 +81,8 @@ export function MorphingCardStack({
   })).reverse();
 
   const containerStyles: Record<LayoutMode, string> = {
-    stack: "relative mx-auto h-[420px] w-[300px] sm:h-[460px] sm:w-[340px]",
+    stack:
+      "relative mx-auto h-[420px] w-[300px] sm:h-[460px] sm:w-[340px] md:h-[500px] md:w-[420px] lg:h-[560px] lg:w-[500px]",
     grid: "grid grid-cols-1 gap-4 sm:grid-cols-2",
     list: "flex flex-col gap-3",
   };

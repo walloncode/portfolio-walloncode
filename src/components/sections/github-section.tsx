@@ -1,8 +1,8 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   motion,
   AnimatePresence,
-  useScroll,
+  useMotionValue,
   useTransform,
   useReducedMotion,
   useMotionValueEvent,
@@ -302,10 +302,35 @@ function GithubPortal({ data }: { data: MenuData }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [menuActive, setMenuActive] = useState(false);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
+  // Progress through the pinned section, computed by hand from the section's
+  // own rect. Motion's useScroll produced a non-monotonic ("hump") curve for
+  // this sticky layout on some viewport heights — the zoom would run forward
+  // then snap back at the bottom, hiding the menu again. A direct
+  // (-rect.top) / (height - viewportHeight) is linear and viewport-agnostic.
+  const scrollYProgress = useMotionValue(0);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const rect = el.getBoundingClientRect();
+      const total = rect.height - window.innerHeight;
+      const p = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
+      scrollYProgress.set(p);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [scrollYProgress]);
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     setMenuActive(v > 0.55);
