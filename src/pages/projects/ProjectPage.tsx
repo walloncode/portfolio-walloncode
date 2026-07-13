@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ProjectBackground } from "@/components/background/project-background";
+import { ProjectContact } from "@/components/sections/project-contact";
+import { projectAccentVars } from "@/lib/project-theme";
 import { ProjectVisual } from "@/components/project-visual";
 import { ProjectCover } from "@/components/project-cover";
 import { ProjectGallery } from "@/components/project-gallery";
@@ -20,7 +22,7 @@ function CaseSection({ title, body }: { title: string; body: string }) {
   return (
     <Reveal>
       <div className="py-8">
-        <h2 className="text-sm font-medium uppercase tracking-wider text-foreground-subtle">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-accent-hover">
           {title}
         </h2>
         <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-foreground-muted">{body}</p>
@@ -51,7 +53,8 @@ export function ProjectPage() {
 
       <ProjectBackground theme={project.theme} sceneKey={project.slug} />
 
-      <article className="pb-28 pt-32">
+      <div style={projectAccentVars(project.theme)}>
+      <article className="pb-16 pt-32">
         <Container>
           <Reveal>
             <Link
@@ -75,6 +78,15 @@ export function ProjectPage() {
               <span className="text-sm text-foreground-subtle">·</span>
               <span className="text-sm text-foreground-subtle">{project.role}</span>
             </motion.div>
+
+            {project.brandLogo && (
+              <motion.img
+                variants={fadeUp}
+                src={project.brandLogo}
+                alt={`${project.title} — logo`}
+                className="mt-5 h-16 w-auto rounded-[var(--radius-md)] bg-white p-3 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)] sm:h-20"
+              />
+            )}
 
             <motion.h1
               variants={fadeUp}
@@ -161,7 +173,7 @@ export function ProjectPage() {
 
             <aside className="space-y-10 md:pt-8">
               <div>
-                <h3 className="text-sm font-medium uppercase tracking-wider text-foreground-subtle">
+                <h3 className="text-sm font-medium uppercase tracking-wider text-accent-hover">
                   Destaques técnicos
                 </h3>
                 <ul className="mt-4 space-y-3">
@@ -175,7 +187,7 @@ export function ProjectPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-medium uppercase tracking-wider text-foreground-subtle">
+                <h3 className="text-sm font-medium uppercase tracking-wider text-accent-hover">
                   Stack
                 </h3>
                 <div className="mt-4 space-y-4">
@@ -190,7 +202,7 @@ export function ProjectPage() {
 
               {project.team && (
                 <div>
-                  <h3 className="text-sm font-medium uppercase tracking-wider text-foreground-subtle">
+                  <h3 className="text-sm font-medium uppercase tracking-wider text-accent-hover">
                     Equipe
                   </h3>
                   <ul className="mt-4 space-y-3">
@@ -224,6 +236,9 @@ export function ProjectPage() {
           </Reveal>
         </Container>
       </article>
+
+      <ProjectContact project={project} />
+      </div>
     </>
   );
 }

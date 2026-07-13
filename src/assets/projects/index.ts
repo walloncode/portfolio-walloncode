@@ -1,4 +1,5 @@
 export { default as rotaruralBanner } from "./rotarural-banner.webp";
+export { default as rotaruralLogo } from "./rotarural-logo.webp";
 export { default as rotaruralHome } from "./rotarural-01-home.webp";
 export { default as rotaruralMapa } from "./rotarural-02-mapa.webp";
 export { default as rotaruralNovoRelato } from "./rotarural-03-novo-relato.webp";
@@ -9,6 +10,8 @@ export { default as rotaruralGestaoDesempenho } from "./rotarural-07-gestao-dese
 export { default as rotaruralGestaoEquipe } from "./rotarural-08-gestao-equipe.webp";
 export { default as rotaruralVoz } from "./rotarural-09-voz.webp";
 export { default as kiusevenHero } from "./kiuseven-hero.webp";
+export { default as kiusevenLogo } from "./kiuseven-logo.svg";
 export { default as wkcodeHero } from "./wkcode-hero.webp";
 export { default as bonaireLogin } from "./bonaire-login.webp";
+export { default as bonaireLogo } from "./bonaire-logo.webp";
 export { default as bonaireMenu } from "./bonaire-menu.webp";

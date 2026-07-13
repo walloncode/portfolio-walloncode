@@ -9,10 +9,13 @@ import {
   rotaruralGestaoDesempenho,
   rotaruralGestaoEquipe,
   rotaruralVoz,
+  rotaruralLogo,
   kiusevenHero,
+  kiusevenLogo,
   wkcodeHero,
   bonaireLogin,
   bonaireMenu,
+  bonaireLogo,
 } from "@/assets/projects";
 
 export type ProjectStatus = "Em produção" | "Em desenvolvimento" | "Concluído" | "Protótipo";
@@ -21,6 +24,7 @@ export type ProjectTheme =
   | "topography"
   | "route"
   | "grid"
+  | "diner"
   | "signal"
   | "aurora"
   | "solar"
@@ -56,6 +60,8 @@ export interface Project {
   team?: TeamMember[];
   theme: ProjectTheme;
   image?: string;
+  /** Brand logo shown on the project tab (currently Kiuseven). */
+  brandLogo?: string;
   gallery?: string[];
   extraLinks?: ProjectLink[];
   disclaimer?: string;
@@ -91,6 +97,7 @@ export const projects: Project[] = [
     ],
     theme: "topography",
     image: rotaruralBanner,
+    brandLogo: rotaruralLogo,
     gallery: [
       rotaruralHome,
       rotaruralMapa,
@@ -183,8 +190,9 @@ export const projects: Project[] = [
     demoUrl: "https://bonaire-delivery.onrender.com",
     isPrivateRepo: true,
     role: "Solo",
-    theme: "grid",
+    theme: "diner",
     image: bonaireMenu,
+    brandLogo: bonaireLogo,
     gallery: [bonaireMenu, bonaireLogin],
     caseStudy: {
       overview:
@@ -347,6 +355,7 @@ export const projects: Project[] = [
     role: "Entrega via WKCODE",
     theme: "solar",
     image: kiusevenHero,
+    brandLogo: kiusevenLogo,
     caseStudy: {
       overview:
         "Kiuseven é uma empresa de energia solar de Rondônia, com instalações residenciais, comerciais e rurais. O site entregue pela WKCODE precisava converter interesse em economia de energia em contato qualificado — não só 'ter uma página'.",

@@ -13,12 +13,14 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 const THEME_BG: Record<ProjectTheme, string> = {
   topography:
-    "radial-gradient(125% 95% at 50% 8%, #0c241a 0%, #06120c 52%, var(--color-canvas) 100%)",
+    "radial-gradient(120% 100% at 50% 14%, #bfe6ff 0%, #7cc0f0 32%, #4a97d8 58%, #2b6aa8 80%, var(--color-canvas) 100%)",
   aurora:
     "radial-gradient(125% 95% at 50% 6%, #072b41 0%, #04121f 52%, var(--color-canvas) 100%)",
   route:
     "radial-gradient(125% 95% at 50% 8%, #0d1533 0%, #070a1a 52%, var(--color-canvas) 100%)",
   grid: "radial-gradient(125% 95% at 50% 8%, #170d2e 0%, #0a0716 52%, var(--color-canvas) 100%)",
+  diner:
+    "radial-gradient(120% 95% at 50% 6%, #21432e 0%, #14291c 46%, #0b1710 74%, var(--color-canvas) 100%)",
   signal:
     "radial-gradient(125% 95% at 50% 8%, #062d31 0%, #04141a 52%, var(--color-canvas) 100%)",
   solar:
@@ -42,35 +44,18 @@ function wavePath(amp: number, baseY: number, period: number) {
   return `M0,${H} L${pts.join(" L")} L${W},${H} Z`;
 }
 
-// A single pine as overlapping triangles (silhouette) + trunk.
-function pine(cx: number, ground: number, h: number, w: number) {
-  const t = (dy: number, hw: number, tipY: number) =>
-    `${cx - hw},${ground - dy} ${cx + hw},${ground - dy} ${cx},${tipY}`;
-  return [
-    t(0, w, ground - h * 0.55),
-    t(h * 0.32, w * 0.82, ground - h * 0.8),
-    t(h * 0.58, w * 0.6, ground - h),
-  ];
-}
-
-function pineRow(count: number, seed: number, ground = 320) {
-  const rows: { pts: string[]; cx: number; trunk: [number, number] }[] = [];
-  const step = 1440 / count;
-  for (let i = 0; i < count; i++) {
-    const r = Math.abs(Math.sin((i + seed) * 12.9898) * 43758.5453) % 1;
-    const cx = i * step + step * (0.3 + r * 0.4);
-    const h = 150 + r * 90;
-    const w = 34 + r * 18;
-    rows.push({ pts: pine(cx, ground, h, w), cx, trunk: [w * 0.16, h] });
+// Filled hill ridge across the 1440-wide rural scene, from `baseY` down to the
+// bottom, with a gentle sine roll. Stacked back-to-front for depth.
+function ridge(baseY: number, amp: number, period: number, phase = 0) {
+  const W = 1440;
+  const B = 600;
+  const pts: string[] = [];
+  for (let x = 0; x <= W; x += 20) {
+    const y = baseY + amp * Math.sin((x / period) * Math.PI * 2 + phase);
+    pts.push(`${x},${y.toFixed(1)}`);
   }
-  return rows;
+  return `M0,${B} L${pts.join(" L")} L${W},${B} Z`;
 }
-
-const FIREFLIES = Array.from({ length: 14 }, (_, i) => {
-  const r = Math.abs(Math.sin((i + 1) * 78.233) * 43758.5453) % 1;
-  const r2 = Math.abs(Math.sin((i + 1) * 12.9898) * 43758.5453) % 1;
-  return { left: 6 + r * 88, top: 24 + r2 * 60, delay: r * 5, dur: 4 + r2 * 4 };
-});
 
 const BUBBLES = Array.from({ length: 12 }, (_, i) => {
   const r = Math.abs(Math.sin((i + 3) * 45.164) * 43758.5453) % 1;
@@ -119,83 +104,101 @@ function Cloud() {
 
 /* --------------------------------- scenes --------------------------------- */
 
-function ForestScene({ reduce }: { reduce: boolean | null }) {
-  const layers = [
-    { seed: 1, fill: "#0a2b1c", y: 250, scale: 1.15, blur: 3, op: 0.9, d: 0.15, sway: 1.2 },
-    { seed: 7, fill: "#0f3a26", y: 285, scale: 1, blur: 1.5, op: 0.95, d: 0.32, sway: 1.8 },
-    { seed: 13, fill: "#155235", y: 320, scale: 0.9, blur: 0, op: 1, d: 0.5, sway: 2.6 },
-  ];
+function RuralScene({ reduce }: { reduce: boolean | null }) {
   return (
     <>
-      {/* moon glow */}
+      {/* warm sun glow, upper right */}
       <motion.div
-        className="absolute left-[62%] top-[8%] h-72 w-72 rounded-full blur-[70px]"
-        style={{ background: "radial-gradient(circle, rgba(180,255,214,0.5), transparent 65%)" }}
+        className="absolute left-[70%] top-[9%] h-72 w-72 rounded-full blur-[64px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(255,244,196,0.6), rgba(255,214,120,0.24) 45%, transparent 70%)",
+        }}
         initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 0.7, scale: 1 }}
-        transition={{ duration: 1.4, ease: EASE }}
+        animate={reduce ? { opacity: 0.85, scale: 1 } : { opacity: [0.7, 0.9, 0.7], scale: 1 }}
+        transition={{
+          opacity: reduce ? { duration: 1.4 } : { duration: 6, repeat: Infinity, ease: "easeInOut" },
+          scale: { duration: 1.4, ease: EASE },
+        }}
       />
-      {/* drifting fog */}
-      {!reduce &&
-        [0, 1].map((i) => (
-          <motion.div
-            key={i}
-            className="absolute inset-x-0"
-            style={{
-              bottom: `${8 + i * 14}%`,
-              height: 120,
-              background:
-                "linear-gradient(90deg, transparent, rgba(120,220,170,0.10), transparent)",
-              filter: "blur(20px)",
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, x: i % 2 ? [0, 60, 0] : [0, -60, 0] }}
-            transition={{
-              opacity: { duration: 1.6, delay: 0.4 },
-              x: { duration: 16 + i * 6, repeat: Infinity, ease: "easeInOut" },
-            }}
-          />
-        ))}
-      {/* tree layers */}
-      {layers.map((l) => (
-        <motion.svg
-          key={l.seed}
-          viewBox="0 0 1440 340"
-          preserveAspectRatio="xMidYMax slice"
-          className="absolute inset-x-0 bottom-0 h-[70%] w-full"
-          style={{ filter: l.blur ? `blur(${l.blur}px)` : undefined, opacity: l.op }}
-          initial={{ y: 160, opacity: 0 }}
-          animate={{ y: 0, opacity: l.op }}
-          transition={{ duration: 1.1, delay: l.d, ease: EASE }}
+
+      {/* drifting clouds */}
+      {CLOUDS.map((c, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{ top: c.top, opacity: c.op }}
+          initial={{ x: reduce ? `${8 + i * 18}vw` : "-30vw" }}
+          animate={reduce ? { x: `${8 + i * 18}vw` } : { x: ["-30vw", "125vw"] }}
+          transition={{ duration: c.dur, delay: c.delay, repeat: reduce ? 0 : Infinity, ease: "linear" }}
         >
-          <motion.g
-            animate={reduce ? undefined : { rotate: [-l.sway * 0.15, l.sway * 0.15, -l.sway * 0.15] }}
-            transition={{ duration: 7 + l.seed * 0.3, repeat: Infinity, ease: "easeInOut" }}
-            style={{ transformOrigin: "50% 100%" }}
-          >
-            {pineRow(9, l.seed).map((p, idx) => (
-              <g key={idx} fill={l.fill}>
-                <rect x={p.cx - p.trunk[0]} y={320} width={p.trunk[0] * 2} height={26} />
-                {p.pts.map((pts, k) => (
-                  <polygon key={k} points={pts} />
-                ))}
-              </g>
-            ))}
-          </motion.g>
-        </motion.svg>
+          <div style={{ transform: `scale(${c.scale})`, transformOrigin: "left center" }}>
+            <Cloud />
+          </div>
+        </motion.div>
       ))}
-      {/* fireflies */}
-      {!reduce &&
-        FIREFLIES.map((f, i) => (
-          <motion.span
-            key={i}
-            className="absolute h-1 w-1 rounded-full bg-[#c6ffdd]"
-            style={{ left: `${f.left}%`, top: `${f.top}%`, boxShadow: "0 0 8px 2px rgba(150,255,200,0.7)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.9, 0], y: [0, -30, -60] }}
-            transition={{ duration: f.dur, delay: f.delay, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
+
+      {/* rural landscape: rolling hills + winding river + a viaduct bridge */}
+      <motion.svg
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="xMidYMax slice"
+        className="absolute inset-x-0 bottom-0 h-[76%] w-full"
+        initial={{ y: 120, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 1.2, ease: EASE }}
+      >
+        <defs>
+          <linearGradient id="rr-river" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#9ad5f7" />
+            <stop offset="100%" stopColor="#2f7fc0" />
+          </linearGradient>
+          <linearGradient id="rr-hill-far" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#74ad6c" />
+            <stop offset="100%" stopColor="#528f54" />
+          </linearGradient>
+        </defs>
+
+        {/* far + mid rolling hills */}
+        <path d={ridge(324, 24, 780)} fill="url(#rr-hill-far)" opacity="0.9" />
+        <path d={ridge(372, 30, 520, 1.2)} fill="#3f8248" />
+
+        {/* winding river coming down from the hills */}
+        <path
+          d="M712,356 C704,420 640,458 660,524 C670,566 616,584 600,600 L884,600 C872,576 832,560 822,522 C808,474 766,430 742,356 Z"
+          fill="url(#rr-river)"
+          opacity="0.92"
+        />
+
+        {/* bridge arches (behind the deck) */}
+        <g fill="none" stroke="#c3c9d0" strokeWidth="7">
+          <path d="M560,387 Q618,432 676,387" />
+          <path d="M666,387 Q720,438 774,387" />
+          <path d="M764,387 Q822,432 880,387" />
+        </g>
+        {/* bridge deck, railing posts and piers */}
+        <g fill="#dbe0e6">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <rect key={i} x={498 + i * 40} y="364" width="4" height="9" />
+          ))}
+          <rect x="486" y="372" width="470" height="15" rx="2" />
+          <rect x="612" y="387" width="13" height="66" />
+          <rect x="714" y="387" width="13" height="72" />
+          <rect x="816" y="387" width="13" height="66" />
+        </g>
+
+        {/* near banks (front), framing the river */}
+        <path d="M0,600 L0,444 C130,454 270,488 372,538 C438,570 476,588 486,600 Z" fill="#2b6238" />
+        <path d="M1440,600 L1440,444 C1310,454 1170,488 1068,538 C1002,570 964,588 954,600 Z" fill="#265a33" />
+
+        {/* a couple of roadside trees on the banks */}
+        <g>
+          <rect x="112" y="470" width="7" height="26" fill="#3a2a18" />
+          <circle cx="115" cy="466" r="20" fill="#24623a" />
+          <rect x="1322" y="474" width="7" height="24" fill="#3a2a18" />
+          <circle cx="1325" cy="470" r="18" fill="#20573380" />
+          <circle cx="1325" cy="470" r="18" fill="#245e37" />
+        </g>
+      </motion.svg>
     </>
   );
 }
@@ -443,8 +446,117 @@ function ShieldScene({ reduce }: { reduce: boolean | null }) {
   );
 }
 
+// Warm ambient bokeh + hanging pendant lights for the restaurant scene.
+const BOKEH = Array.from({ length: 16 }, (_, i) => {
+  const r = Math.abs(Math.sin((i + 2) * 51.17) * 43758.5453) % 1;
+  const r2 = Math.abs(Math.sin((i + 2) * 24.31) * 43758.5453) % 1;
+  return { left: 4 + r * 92, top: 8 + r2 * 66, size: 6 + r2 * 16, delay: r * 5, dur: 5 + r * 5 };
+});
+
+const PENDANTS = [
+  { left: "27%", drop: 118, glow: 150 },
+  { left: "50%", drop: 88, glow: 200 },
+  { left: "73%", drop: 138, glow: 150 },
+];
+
+function DinerScene({ reduce }: { reduce: boolean | null }) {
+  const CREAM = "#fff0d3";
+  const ORANGE = "#e8542b";
+  return (
+    <>
+      {/* hanging pendant lights casting a warm glow */}
+      {PENDANTS.map((p, i) => (
+        <motion.div
+          key={i}
+          className="absolute top-0"
+          style={{ left: p.left }}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.1 + i * 0.12, ease: EASE }}
+        >
+          <div className="mx-auto w-px bg-white/15" style={{ height: p.drop }} />
+          <motion.div
+            className="relative mx-auto h-3 w-3 -translate-y-1 rounded-full"
+            style={{ background: ORANGE, boxShadow: `0 0 26px 7px ${ORANGE}` }}
+            animate={reduce ? undefined : { opacity: [0.8, 1, 0.8] }}
+            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <div
+            className="absolute left-1/2 -translate-x-1/2 rounded-b-full"
+            style={{
+              top: p.drop,
+              width: p.glow,
+              height: p.glow * 1.5,
+              background: "radial-gradient(60% 80% at 50% 0%, rgba(232,84,43,0.26), transparent 70%)",
+              filter: "blur(8px)",
+            }}
+          />
+        </motion.div>
+      ))}
+
+      {/* warm ambient bokeh */}
+      {!reduce &&
+        BOKEH.map((b, i) => (
+          <motion.span
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              left: `${b.left}%`,
+              top: `${b.top}%`,
+              width: b.size,
+              height: b.size,
+              background: i % 3 === 0 ? ORANGE : CREAM,
+              filter: "blur(2px)",
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.5, 0], y: [0, -12, 0] }}
+            transition={{ duration: b.dur, delay: b.delay, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ))}
+
+      {/* a steaming plate at center-bottom */}
+      <motion.div
+        className="absolute bottom-[13%] left-1/2 h-[170px] w-[240px] -translate-x-1/2"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.1, delay: 0.3, ease: EASE }}
+      >
+        {/* rising steam */}
+        {!reduce &&
+          [0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                left: 96 + i * 24,
+                bottom: 66,
+                width: 9,
+                height: 84,
+                background:
+                  "linear-gradient(to top, rgba(255,240,211,0), rgba(255,240,211,0.5), rgba(255,240,211,0))",
+                filter: "blur(6px)",
+              }}
+              initial={{ opacity: 0, y: 0, scaleY: 0.7 }}
+              animate={{ opacity: [0, 0.7, 0], y: [-6, -84], scaleY: [0.7, 1.25] }}
+              transition={{ duration: 5 + i, delay: i * 0.8, repeat: Infinity, ease: "easeOut" }}
+            />
+          ))}
+        {/* plate + food */}
+        <svg viewBox="0 0 240 96" className="absolute bottom-0 h-auto w-full">
+          <ellipse cx="120" cy="66" rx="116" ry="26" fill="#0f2116" opacity="0.7" />
+          <ellipse cx="120" cy="60" rx="116" ry="26" fill={CREAM} />
+          <ellipse cx="120" cy="60" rx="78" ry="16" fill="#ecdfc0" />
+          <path d="M74,60 Q120,26 166,60 Z" fill={ORANGE} />
+          <ellipse cx="120" cy="60" rx="46" ry="9" fill="#c8431f" />
+        </svg>
+      </motion.div>
+    </>
+  );
+}
+
 const SCENES: Record<ProjectTheme, ComponentType<{ reduce: boolean | null }>> = {
-  topography: ForestScene,
+  topography: RuralScene,
+  diner: DinerScene,
   aurora: OceanScene,
   route: RouteScene,
   grid: GridScene,
