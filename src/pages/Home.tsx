@@ -4,7 +4,7 @@ import { ProjectsParallax } from "@/components/sections/projects-parallax";
 import { WorkFileManager } from "@/components/sections/work-file-manager";
 import { SelectedWork } from "@/components/sections/selected-work";
 import { WkSection } from "@/components/sections/wk-section";
-import { About } from "@/components/sections/about";
+import { AboutParallax } from "@/components/sections/about-parallax";
 import { SkillsSection } from "@/components/sections/skills-section";
 import { JourneySection } from "@/components/sections/journey-section";
 import { EnglishParallax } from "@/components/sections/english-parallax";
@@ -33,7 +33,7 @@ export function Home() {
       <WorkFileManager />
       <SelectedWork />
       <WkSection />
-      <About />
+      <AboutParallax />
       <SkillsSection />
       <ScrollAtmosphere>
         <JourneySection />

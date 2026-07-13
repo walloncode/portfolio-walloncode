@@ -6,7 +6,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { profile } from "@/content/profile";
 import { cn } from "@/lib/utils";
 
-interface Step {
+export interface Step {
   icon: LucideIcon;
   label: string;
   body: string;
@@ -15,7 +15,7 @@ interface Step {
   anim: string;
 }
 
-const STEPS: Step[] = [
+export const STEPS: Step[] = [
   {
     icon: Compass,
     label: "Entender",
@@ -46,14 +46,14 @@ const STEPS: Step[] = [
   },
 ];
 
-const TAGS = ["Arquitetura auditável", "Segurança no escopo", "Offline-first", "IA sob gate"];
+export const TAGS = ["Arquitetura auditável", "Segurança no escopo", "Offline-first", "IA sob gate"];
 
-const GLASS =
+export const GLASS =
   "rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]";
 
 const SPOT_REST = "radial-gradient(650px circle at 20% 30%, rgba(255,255,255,0.06), transparent 40%)";
 
-function StepCard({ step }: { step: Step }) {
+export function StepCard({ step }: { step: Step }) {
   const Icon = step.icon;
   return (
     <div className="flex items-center gap-2">
