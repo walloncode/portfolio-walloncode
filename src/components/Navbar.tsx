@@ -9,6 +9,7 @@ import wallonMark from "@/assets/walloncode-mark.png";
 
 const NAV_ITEMS = [
   { label: "Trabalho", hash: "work" },
+  { label: "WK", hash: "wk" },
   { label: "Sobre", hash: "about" },
   { label: "Skills", hash: "skills" },
   { label: "Percurso", hash: "journey" },
@@ -82,7 +83,7 @@ export function Navbar() {
             className="size-7 rounded-full ring-1 ring-accent-border transition-transform duration-300 group-hover:scale-110"
           />
           <span className="font-mono text-sm font-medium tracking-tight text-foreground transition-colors group-hover:text-accent-hover">
-            wellyson.dev
+            Walloncode
           </span>
         </Link>
 

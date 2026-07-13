@@ -16,10 +16,15 @@ const GLOWS = [
   "radial-gradient(120% 120% at 70% 75%, rgba(150,92,255,0.40), rgba(150,92,255,0.05) 55%, transparent 72%)",
 ];
 
-export function English3DPanel() {
+export function English3DPanel({ flat = false }: { flat?: boolean } = {}) {
   const reduce = useReducedMotion();
   const sceneRef = useRef<HTMLDivElement>(null);
   const raf = useRef<number | null>(null);
+
+  // `flat` sits the panel upright at rest (no resting tilt) — it still tilts
+  // toward the cursor on hover.
+  const restX = flat ? 0 : REST_X;
+  const restY = flat ? 0 : REST_Y;
 
   // Only enable the 3D tilt/parallax for fine pointers (mouse). On touch the
   // resting tilt would push the panel past the viewport, and there's no cursor
@@ -56,7 +61,7 @@ export function English3DPanel() {
 
   const onLeave = () => {
     if (raf.current) cancelAnimationFrame(raf.current);
-    setVars(REST_X, REST_Y);
+    setVars(restX, restY);
   };
 
   return (
@@ -67,8 +72,8 @@ export function English3DPanel() {
       className={cn("relative", enabled && "en3d-scene")}
       style={
         {
-          "--en-x": enabled ? REST_X : 0,
-          "--en-y": enabled ? REST_Y : 0,
+          "--en-x": enabled ? restX : 0,
+          "--en-y": enabled ? restY : 0,
         } as React.CSSProperties
       }
     >

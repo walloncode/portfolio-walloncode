@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 const currentIndex = CEFR_SCALE.indexOf(CEFR_CURRENT);
 
 /** CEFR ladder — levels up to and including the current one are filled. */
-function CefrScale() {
+export function CefrScale() {
   return (
     <div>
       <div className="flex items-end gap-1.5">

@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { useReducedMotion } from "motion/react";
 import { Compass, LayoutTemplate, Lock, Rocket, type LucideIcon } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { ShaderField, WAVES_FRAG } from "@/components/background/shader-field";
 import { Reveal } from "@/components/ui/reveal";
 import { profile } from "@/content/profile";
 import { cn } from "@/lib/utils";
@@ -106,10 +105,9 @@ export function About() {
             onMouseLeave={onLeave}
             className="relative isolate overflow-hidden rounded-[2rem] border border-white/[0.07] bg-canvas-elevated shadow-[var(--shadow-elevated)]"
           >
-            {/* Colorful waves shader background */}
+            {/* Static ambient background — no moving shader */}
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
-              <ShaderField frag={WAVES_FRAG} className="h-full w-full opacity-80" />
-              {/* scrims keep the copy readable and blend the waves into the card */}
+              <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_18%_20%,rgba(91,108,255,0.14),transparent_60%)]" />
               <div className="absolute inset-0 bg-canvas-elevated/55" />
               <div className="absolute inset-0 bg-[radial-gradient(130%_130%_at_12%_35%,var(--color-canvas-elevated)_18%,transparent_65%)]" />
             </div>

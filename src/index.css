@@ -93,6 +93,12 @@ body {
   33% { transform: translate(7px, -11px); }
   66% { transform: translate(-6px, 7px); }
 }
+/* Contact cosmos — twinkling starfield */
+@keyframes twinkle {
+  0%, 100% { opacity: var(--star-min, 0.25); }
+  50% { opacity: 1; }
+}
+
 .anim-float { animation: floatY 7s ease-in-out infinite; }
 .anim-float-delayed { animation: floatY 8s ease-in-out infinite 1.2s; }
 .anim-float-slow { animation: floatYReverse 9s ease-in-out infinite 0.5s; }

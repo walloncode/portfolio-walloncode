@@ -1,12 +1,14 @@
 import { Helmet } from "react-helmet-async";
 import { Hero } from "@/components/sections/hero";
 import { ProjectsParallax } from "@/components/sections/projects-parallax";
-import { SelectedWork } from "@/components/sections/selected-work";
+import { WorkFileManager } from "@/components/sections/work-file-manager";
+import { WkSection } from "@/components/sections/wk-section";
 import { About } from "@/components/sections/about";
 import { SkillsSection } from "@/components/sections/skills-section";
 import { JourneySection } from "@/components/sections/journey-section";
-import { EnglishSection } from "@/components/sections/english-section";
+import { EnglishParallax } from "@/components/sections/english-parallax";
 import { GithubSection } from "@/components/sections/github-section";
+import { ContactCosmos } from "@/components/sections/contact-cosmos";
 import { Contact } from "@/components/sections/contact";
 import { ScrollAtmosphere } from "@/components/background/scroll-atmosphere";
 import { profile } from "@/content/profile";
@@ -27,13 +29,15 @@ export function Home() {
 
       <Hero />
       <ProjectsParallax />
-      <SelectedWork />
+      <WorkFileManager />
+      <WkSection />
       <About />
       <SkillsSection />
       <ScrollAtmosphere>
         <JourneySection />
-        <EnglishSection />
+        <EnglishParallax />
         <GithubSection />
+        <ContactCosmos />
         <Contact />
       </ScrollAtmosphere>
     </>
