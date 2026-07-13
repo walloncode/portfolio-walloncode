@@ -130,7 +130,7 @@ interface MenuData extends ReturnType<typeof useGithubData> {}
 function GithubMenu({ data, active }: { data: MenuData; active: boolean }) {
   const { user, memberSince } = data;
   return (
-    <div className="max-h-[86vh] w-[min(1040px,92vw)] overflow-y-auto rounded-[1.75rem] border border-white/[0.1] bg-canvas-elevated/85 p-5 shadow-[0_50px_120px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl md:p-7">
+    <div className="max-h-[86vh] w-[min(1040px,92vw)] overflow-y-auto rounded-[1.75rem] border border-white/[0.1] bg-canvas-elevated p-5 shadow-[0_50px_120px_-40px_rgba(0,0,0,0.9)] md:bg-canvas-elevated/85 md:p-7 md:backdrop-blur-xl">
       {/* header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-center gap-3">
@@ -356,7 +356,7 @@ function GithubPortal({ data }: { data: MenuData }) {
         <motion.div
           aria-hidden="true"
           style={{ scale: glowScale, opacity: glowOpacity }}
-          className="pointer-events-none absolute size-[42vmin] rounded-full blur-[80px]"
+          className="pointer-events-none absolute size-[42vmin] rounded-full blur-[48px] sm:blur-[80px]"
         >
           <div className="size-full rounded-full bg-[radial-gradient(circle,rgba(124,92,255,0.85),rgba(91,108,255,0.25)_55%,transparent_72%)]" />
         </motion.div>

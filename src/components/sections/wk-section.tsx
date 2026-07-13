@@ -187,7 +187,7 @@ function WkPortal() {
         <motion.div
           aria-hidden="true"
           style={{ scale: glowScale, opacity: glowOpacity }}
-          className="pointer-events-none absolute size-[46vmin] rounded-full blur-[90px]"
+          className="pointer-events-none absolute size-[46vmin] rounded-full blur-[50px] sm:blur-[90px]"
         >
           <div className="size-full rounded-full bg-[radial-gradient(circle,rgba(91,108,255,0.85),rgba(124,92,255,0.2)_55%,transparent_72%)]" />
         </motion.div>

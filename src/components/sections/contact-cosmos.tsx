@@ -12,6 +12,11 @@ import wallonMark from "@/assets/walloncode-mark.png";
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
+/** Mobile GPUs choke on big blurs / hundreds of animated nodes — we dial the
+ *  scene down on small screens. Read once at mount (cheap, stable enough). */
+const isMobileViewport = () =>
+  typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
+
 interface Star {
   id: number;
   top: number;
@@ -63,25 +68,28 @@ function Starfield({ stars }: { stars: Star[] }) {
 
 /** The purple planet — a giant sphere anchored at the bottom, so only its top
  *  half arcs across the screen like a horizon. */
-function Planet() {
+function Planet({ simplified }: { simplified?: boolean }) {
   return (
     <div
       className="size-[150vmin] rounded-full"
       style={{
         background:
           "radial-gradient(circle at 50% 8%, #c4b5fd 0%, #8b5cf6 22%, #6d28d9 42%, #3b0f75 66%, #1a0740 100%)",
-        boxShadow:
-          "0 -30px 120px -20px rgba(167,139,250,0.55), inset 0 22px 60px -10px rgba(221,214,254,0.75)",
+        boxShadow: simplified
+          ? "inset 0 18px 48px -12px rgba(221,214,254,0.7)"
+          : "0 -30px 120px -20px rgba(167,139,250,0.55), inset 0 22px 60px -10px rgba(221,214,254,0.75)",
       }}
     >
-      {/* subtle surface banding */}
-      <div
-        className="absolute inset-0 rounded-full opacity-40 mix-blend-soft-light"
-        style={{
-          background:
-            "repeating-radial-gradient(circle at 50% 8%, transparent 0 22px, rgba(0,0,0,0.18) 22px 46px)",
-        }}
-      />
+      {/* subtle surface banding — the mix-blend is costly on mobile, so skip it */}
+      {!simplified && (
+        <div
+          className="absolute inset-0 rounded-full opacity-40 mix-blend-soft-light"
+          style={{
+            background:
+              "repeating-radial-gradient(circle at 50% 8%, transparent 0 22px, rgba(0,0,0,0.18) 22px 46px)",
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -102,7 +110,8 @@ function CosmicScene({
   headline1Style: MotionStyle;
   headline2Style: MotionStyle;
 }) {
-  const stars = useStars(150);
+  const mobile = isMobileViewport();
+  const stars = useStars(mobile ? 48 : 140);
 
   return (
     <>
@@ -114,7 +123,7 @@ function CosmicScene({
       {/* nebula glow behind the mark */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-[38%] size-[60vmin] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[90px]"
+        className="pointer-events-none absolute left-1/2 top-[38%] size-[60vmin] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[55px] sm:blur-[90px]"
         style={{
           background:
             "radial-gradient(circle, rgba(139,92,246,0.4), rgba(91,108,255,0.14) 55%, transparent 72%)",
@@ -125,7 +134,7 @@ function CosmicScene({
       <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-[54%]">
         <motion.div style={{ y: planetY }} className="will-change-transform">
           <div className="relative">
-            <Planet />
+            <Planet simplified={mobile} />
           </div>
         </motion.div>
       </div>

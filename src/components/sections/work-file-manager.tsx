@@ -313,7 +313,7 @@ function FileManagerPortal() {
         <motion.div
           aria-hidden="true"
           style={{ opacity: glowOpacity }}
-          className="pointer-events-none absolute size-[60vmin] rounded-full blur-[100px]"
+          className="pointer-events-none absolute size-[60vmin] rounded-full blur-[55px] sm:blur-[100px]"
         >
           <div className="size-full rounded-full bg-[radial-gradient(circle,rgba(91,108,255,0.55),transparent_70%)]" />
         </motion.div>
