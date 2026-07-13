@@ -48,13 +48,23 @@ const SWIPE_THRESHOLD = 60;
 /** How many cards to keep rendered behind the top card in stack mode. */
 const STACK_DEPTH = 3;
 
+/** Grade abre por padrão no desktop; pilha (arrastável) no mobile. */
+function responsiveDefaultLayout(): LayoutMode {
+  if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+    return "grid";
+  }
+  return "stack";
+}
+
 export function MorphingCardStack({
   cards = [],
   className,
-  defaultLayout = "stack",
+  defaultLayout,
 }: MorphingCardStackProps) {
   const reduceMotion = useReducedMotion();
-  const [layout, setLayout] = React.useState<LayoutMode>(defaultLayout);
+  const [layout, setLayout] = React.useState<LayoutMode>(
+    () => defaultLayout ?? responsiveDefaultLayout(),
+  );
   const [activeIndex, setActiveIndex] = React.useState(0);
   const draggingRef = React.useRef(false);
 
