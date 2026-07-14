@@ -117,13 +117,10 @@ function AboutPortal() {
                       Processo
                     </span>
                   </div>
-                  <h2
-                    className="font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem] md:text-[3rem]"
-                    style={HEADING_GRADIENT}
-                  >
+                  <h2 className="title-std" style={HEADING_GRADIENT}>
                     Como eu trabalho
                   </h2>
-                  <p className="mt-6 max-w-md text-2xl font-normal leading-relaxed text-foreground-muted">
+                  <p className="subtext-std mt-6 max-w-md text-foreground-muted">
                     Do problema à entrega, cada decisão passa por modelagem, arquitetura e
                     segurança — priorizando o que é auditável sobre o que é mágico.
                   </p>

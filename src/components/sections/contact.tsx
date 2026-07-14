@@ -56,12 +56,12 @@ export function Contact() {
             </p>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="mt-3 font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[2.5rem] md:text-[3rem]">
+            <h2 className="title-std mt-3 text-foreground">
               Tem um projeto em mente?
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mt-5 text-2xl font-normal leading-relaxed text-foreground-muted">
+            <p className="subtext-std mt-5 text-foreground-muted">
               Aberto a oportunidades e projetos que exijam engenharia de verdade, não só
               entrega rápida.
             </p>

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@import "@fontsource/sora/300.css";
 @import "@fontsource/sora/400.css";
 @import "@fontsource/sora/500.css";
 @import "@fontsource/sora/600.css";
@@ -66,6 +67,28 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Standardized typography — all section titles and supporting copy share
+   one scale. `.title-std` = Sora Bold 48px, `.subtext-std` = Sora Light 24px.
+   Defined outside Tailwind's layers so they win over ad-hoc size/weight
+   utilities left on the element. Small screens scale down to avoid overflow. */
+.title-std {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.subtext-std {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 1.6;
+}
+@media (max-width: 480px) {
+  .title-std { font-size: 34px; }
+  .subtext-std { font-size: 20px; }
 }
 
 ::selection {

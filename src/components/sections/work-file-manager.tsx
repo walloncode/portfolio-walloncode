@@ -321,7 +321,7 @@ function FileManagerPortal() {
         {/* continuity headline */}
         <motion.h2
           style={{ opacity: introOpacity, y: introY }}
-          className="pointer-events-none absolute z-20 px-6 text-center font-display text-[clamp(2rem,7vw,4.5rem)] font-extrabold leading-[1.05] tracking-[-0.02em] text-foreground [text-shadow:0_8px_40px_rgba(91,108,255,0.4)]"
+          className="title-std pointer-events-none absolute z-20 px-6 text-center text-foreground [text-shadow:0_8px_40px_rgba(91,108,255,0.4)]"
         >
           Quer ver meus trabalhos?
         </motion.h2>

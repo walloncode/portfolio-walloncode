@@ -165,7 +165,7 @@ function SkillsGrid() {
         <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent-hover">
           Capacidades
         </p>
-        <h2 className="mt-3 font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[2.5rem] md:text-[3rem]">
+        <h2 className="title-std mt-3 text-foreground">
           Skills
         </h2>
         <div className="mt-10 grid gap-5 sm:grid-cols-2">
@@ -269,13 +269,10 @@ export function SkillsSection() {
             <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent-hover">
               Capacidades
             </p>
-            <h2
-              ref={headingRef}
-              className="mt-4 font-display text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-foreground sm:text-[3.25rem] lg:text-[3.5rem]"
-            >
+            <h2 ref={headingRef} className="title-std mt-4 text-foreground">
               Skills
             </h2>
-            <p className="mt-5 max-w-sm text-2xl font-normal leading-relaxed text-foreground-muted">
+            <p className="subtext-std mt-5 max-w-sm text-foreground-muted">
               Role para a lateral — as capacidades entram da direita, do técnico ao
               humano.
             </p>

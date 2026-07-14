@@ -157,13 +157,13 @@ function CosmicScene({
             style={headline1Style}
             className="absolute inset-x-0 top-0 font-display font-extrabold leading-[1.02] tracking-[-0.03em] text-foreground [text-shadow:0_8px_40px_rgba(139,92,246,0.45)] will-change-transform"
           >
-            <span className="block text-[clamp(2.5rem,10vw,7rem)]">Tem algo em mente?</span>
+            <span className="title-std block">Tem algo em mente?</span>
           </motion.h2>
           <motion.h2
             style={headline2Style}
             className="absolute inset-x-0 top-0 font-display font-extrabold leading-[1.02] tracking-[-0.03em] text-foreground [text-shadow:0_8px_40px_rgba(139,92,246,0.45)] will-change-transform"
           >
-            <span className="block text-[clamp(2.5rem,10vw,7rem)]">Então vamos conversar</span>
+            <span className="title-std block">Então vamos conversar</span>
           </motion.h2>
         </div>
       </div>

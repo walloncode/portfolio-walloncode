@@ -50,7 +50,7 @@ export function ProjectContact({ project }: { project: Project }) {
             </p>
           </Reveal>
           <Reveal delay={0.05}>
-            <h2 className="mt-3 font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[2.5rem]">
+            <h2 className="title-std mt-3 text-foreground">
               Gostou deste projeto?
             </h2>
           </Reveal>

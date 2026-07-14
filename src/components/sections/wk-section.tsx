@@ -83,10 +83,10 @@ function AgencyPitch() {
       <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent-hover">
         WKCODE
       </p>
-      <h3 className="mx-auto mt-3 max-w-2xl font-display text-2xl font-bold leading-tight tracking-[-0.02em] text-foreground sm:text-3xl">
+      <h3 className="title-std mx-auto mt-3 max-w-2xl text-foreground">
         A agência por trás do código
       </h3>
-      <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-foreground-muted">
+      <p className="mx-auto mt-4 max-w-xl subtext-std text-foreground-muted">
         A WKCODE é a minha agência de desenvolvimento — sites e sistemas sob medida, do design
         à produção. Já entregamos projetos reais para clientes como a Kiuseven Energia Solar,
         com foco em performance, identidade visual e código que sustenta o negócio.

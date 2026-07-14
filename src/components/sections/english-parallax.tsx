@@ -113,10 +113,10 @@ function EnglishPortal() {
           <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent-hover">
             {english.eyebrow}
           </p>
-          <h2 className="mt-2 font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] text-foreground lg:text-[2.5rem]">
+          <h2 className="title-std mt-2 text-foreground">
             {english.title}
           </h2>
-          <p className="mt-3 text-base leading-relaxed text-foreground-muted">{english.lead}</p>
+          <p className="subtext-std mt-3 text-foreground-muted">{english.lead}</p>
         </motion.div>
 
         {/* right board — level card + interactive panel */}
