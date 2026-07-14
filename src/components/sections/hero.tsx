@@ -3,18 +3,11 @@ import { useRef } from "react";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { FloatingLines } from "@/components/background/floating-lines";
+import { SplitText } from "@/components/ui/split-text";
 import { profile } from "@/content/profile";
 import portrait from "@/assets/portrait-cut.webp";
 
 const NAME = "Wellyson";
-
-const NAME_STYLE = {
-  backgroundImage: "linear-gradient(180deg, #f5f5f7 0%, #6b6b74 100%)",
-  WebkitBackgroundClip: "text",
-  backgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  color: "transparent",
-} as const;
 
 export function Hero() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -93,25 +86,41 @@ export function Hero() {
             style={textStyle}
             className="order-2 flex flex-col items-center text-center md:order-1 md:items-start md:text-left"
           >
-            <motion.h1
-              aria-label={NAME}
-              initial={prefersReducedMotion ? undefined : { x: -60, opacity: 0 }}
-              animate={prefersReducedMotion ? undefined : { x: 0, opacity: 1 }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-              className="select-none font-sans text-6xl font-extrabold leading-[0.9] tracking-[-0.04em] sm:text-7xl lg:text-8xl xl:text-[6.5rem]"
-              style={NAME_STYLE}
-            >
-              {NAME}
-            </motion.h1>
+            <SplitText
+              tag="h1"
+              text={NAME}
+              className="hero-name select-none font-sans text-6xl font-extrabold leading-[0.9] tracking-[-0.04em] sm:text-7xl lg:text-8xl xl:text-[6.5rem]"
+              splitType="chars"
+              delay={60}
+              duration={1}
+              from={{ opacity: 0, y: 60 }}
+              to={{ opacity: 1, y: 0 }}
+              textAlign="left"
+            />
 
-            <p className="mt-4 font-mono text-sm uppercase tracking-[0.2em] text-accent-hover sm:text-base">
-              {profile.role}
-            </p>
+            <SplitText
+              tag="p"
+              text={profile.role}
+              className="mt-4 font-mono text-sm uppercase tracking-[0.2em] text-accent-hover sm:text-base"
+              splitType="chars"
+              delay={25}
+              duration={0.6}
+              from={{ opacity: 0, y: 20 }}
+              to={{ opacity: 1, y: 0 }}
+              textAlign="left"
+            />
 
-            <p className="mt-5 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base">
-              Ariquemes, RO — sistemas de ponta a ponta, do agente de automação ao
-              produto no ar.
-            </p>
+            <SplitText
+              tag="p"
+              text="Ariquemes, RO — sistemas de ponta a ponta, do agente de automação ao produto no ar."
+              className="mt-5 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base"
+              splitType="words"
+              delay={18}
+              duration={0.6}
+              from={{ opacity: 0, y: 16 }}
+              to={{ opacity: 1, y: 0 }}
+              textAlign="left"
+            />
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 md:justify-start">
               <a
@@ -148,10 +157,11 @@ export function Hero() {
         </div>
       </Container>
 
-      {/* ground the figure into the page */}
+      {/* Fade the hero (figure + animated background) down into the canvas so it
+          dissolves smoothly into the work section — no hard seam. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-gradient-to-t from-canvas to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-48 bg-gradient-to-t from-canvas via-canvas/85 to-transparent md:h-64"
       />
 
       {!prefersReducedMotion && (

@@ -131,6 +131,22 @@ body {
   transform-origin: 50% 50%;
 }
 
+/* SplitText — per char/word spans animate in via GSAP */
+.split-parent .split-char,
+.split-parent .split-word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+/* Hero name keeps the silver gradient, applied per split char (vertical
+   gradient → each equal-height char reads continuous with the whole word). */
+.hero-name .split-char {
+  background-image: linear-gradient(180deg, #f5f5f7 0%, #6b6b74 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
 .anim-float { animation: floatY 7s ease-in-out infinite; }
 .anim-float-delayed { animation: floatY 8s ease-in-out infinite 1.2s; }
 .anim-float-slow { animation: floatYReverse 9s ease-in-out infinite 0.5s; }

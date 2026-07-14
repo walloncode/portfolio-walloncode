@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowUpRight, Check, Copy, GitBranch } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
+import { SplitText } from "@/components/ui/split-text";
 import { Button } from "@/components/ui/button";
 import {
   DiscordIcon,
@@ -55,11 +56,17 @@ export function Contact() {
               Contato
             </p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h2 className="title-std mt-3 text-foreground">
-              Tem um projeto em mente?
-            </h2>
-          </Reveal>
+          <SplitText
+            tag="h2"
+            text="Tem um projeto em mente?"
+            className="title-std mt-3 text-foreground"
+            splitType="chars"
+            delay={30}
+            duration={0.8}
+            from={{ opacity: 0, y: 30 }}
+            to={{ opacity: 1, y: 0 }}
+            textAlign="center"
+          />
           <Reveal delay={0.1}>
             <p className="subtext-std mt-5 text-foreground-muted">
               Aberto a oportunidades e projetos que exijam engenharia de verdade, não só
