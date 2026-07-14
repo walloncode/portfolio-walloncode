@@ -181,7 +181,7 @@ function WkPortal() {
   const typed = URL_TYPED.slice(0, typedCount);
 
   return (
-    <section ref={sectionRef} id="wk" className="relative h-[300vh]">
+    <section ref={sectionRef} id="wk" className="relative h-[170vh] md:h-[300vh]">
       <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden">
         {/* ambient glow */}
         <motion.div

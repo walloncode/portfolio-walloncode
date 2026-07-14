@@ -350,7 +350,7 @@ function GithubPortal({ data }: { data: MenuData }) {
   const hintOpacity = useTransform(scrollYProgress, [0, 0.12, 0.24], [1, 1, 0]);
 
   return (
-    <section ref={sectionRef} id="github" className="relative h-[280vh]">
+    <section ref={sectionRef} id="github" className="relative h-[160vh] md:h-[280vh]">
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
         {/* ambient glow that grows with the zoom */}
         <motion.div

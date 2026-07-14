@@ -93,7 +93,7 @@ function EnglishPortal() {
   const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
 
   return (
-    <section ref={sectionRef} id="english" className="relative h-[240vh]">
+    <section ref={sectionRef} id="english" className="relative h-[140vh] md:h-[240vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
         {/* translator glyph — center → left */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

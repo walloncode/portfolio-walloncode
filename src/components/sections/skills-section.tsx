@@ -232,7 +232,7 @@ export function SkillsSection() {
   }
 
   return (
-    <section ref={sectionRef} id="skills" className="relative h-[520vh]">
+    <section ref={sectionRef} id="skills" className="relative h-[280vh] md:h-[520vh]">
       <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
         {/* purple ambient glow, echoing the reference panel */}
         <div

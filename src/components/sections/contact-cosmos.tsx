@@ -226,7 +226,7 @@ function CosmosPortal() {
   const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
 
   return (
-    <section ref={sectionRef} id="contact-intro" className="relative h-[320vh]">
+    <section ref={sectionRef} id="contact-intro" className="relative h-[180vh] md:h-[320vh]">
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-canvas">
         <CosmicScene
           starsY={starsY}

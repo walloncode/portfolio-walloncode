@@ -93,7 +93,7 @@ function AboutPortal() {
   const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
 
   return (
-    <section ref={sectionRef} id="about" className="relative h-[240vh]">
+    <section ref={sectionRef} id="about" className="relative h-[140vh] md:h-[240vh]">
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
         <Container className="w-full">
           <motion.div
