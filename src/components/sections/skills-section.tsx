@@ -4,6 +4,7 @@ import {
   useScroll,
   useTransform,
   useReducedMotion,
+  useMotionValueEvent,
   type MotionValue,
 } from "motion/react";
 import { Container } from "@/components/ui/container";
@@ -188,10 +189,19 @@ export function SkillsSection() {
   const skillsRef = useRef<HTMLSpanElement>(null);
   const [distance, setDistance] = useState(0);
   const [target, setTarget] = useState<HandoffTarget>({ x: 0, y: 0, scale: 0.42 });
+  // Once the intro has handed off to the card track, unmount the overlay
+  // completely — leaving it mounted let the big words linger as ghosts behind
+  // the cards for the rest of the section.
+  const [introMounted, setIntroMounted] = useState(true);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
+  });
+
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const next = v < 0.52;
+    setIntroMounted((prev) => (prev === next ? prev : next));
   });
 
   // Measure the track slide distance + where the intro "Skills" must land so it
@@ -245,7 +255,9 @@ export function SkillsSection() {
         />
 
         {/* intro: S → 3 words → Skills → lands on the track heading */}
-        <SkillsIntro progress={scrollYProgress} target={target} skillsRef={skillsRef} />
+        {introMounted && (
+          <SkillsIntro progress={scrollYProgress} target={target} skillsRef={skillsRef} />
+        )}
 
         <motion.div
           ref={trackRef}
