@@ -290,21 +290,21 @@ function FileManagerPortal() {
   }, [scrollYProgress]);
 
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    setPhase(v < 0.3 ? 0 : v < 0.54 ? 1 : 2);
+    setPhase(v < 0.52 ? 0 : v < 0.72 ? 1 : 2);
   });
 
-  // Window enters early, holds through the navigation, then fades out.
-  const windowScale = useTransform(scrollYProgress, [0, 0.1, 0.74, 0.86], [0.92, 1, 1, 1.04]);
-  const windowOpacity = useTransform(scrollYProgress, [0, 0.06, 0.76, 0.86], [0, 1, 1, 0]);
-  const windowY = useTransform(scrollYProgress, [0.76, 1], ["0vh", "-6vh"]);
-  const glowOpacity = useTransform(scrollYProgress, [0, 0.3, 0.9], [0.25, 0.5, 0.2]);
+  // Opening line — "Quer ver meus trabalhos?" — rises in first, then clears
+  // to hand off to the Finder demo below it.
+  const introOpacity = useTransform(scrollYProgress, [0, 0.06, 0.18, 0.26], [0, 1, 1, 0]);
+  const introY = useTransform(scrollYProgress, [0, 0.1, 0.26], [44, 0, -40]);
 
-  // Continuity line — "Quer ver meus trabalhos?" — rises in as the window
-  // clears, then fades out as the projects section scrolls up below.
-  const introOpacity = useTransform(scrollYProgress, [0.78, 0.86, 0.94, 1], [0, 1, 1, 0]);
-  const introY = useTransform(scrollYProgress, [0.78, 0.88, 1], [44, 0, -40]);
+  // Window enters after the intro clears, holds through the navigation, fades.
+  const windowScale = useTransform(scrollYProgress, [0.28, 0.4, 0.86, 0.98], [0.92, 1, 1, 1.04]);
+  const windowOpacity = useTransform(scrollYProgress, [0.28, 0.36, 0.9, 1], [0, 1, 1, 0]);
+  const windowY = useTransform(scrollYProgress, [0.9, 1], ["0vh", "-6vh"]);
+  const glowOpacity = useTransform(scrollYProgress, [0.28, 0.5, 1], [0.25, 0.5, 0.2]);
 
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
+  const hintOpacity = useTransform(scrollYProgress, [0.3, 0.4, 0.56, 0.64], [0, 1, 1, 0]);
 
   return (
     <section ref={sectionRef} id="work-intro" className="relative h-[180vh] md:h-[320vh]">
