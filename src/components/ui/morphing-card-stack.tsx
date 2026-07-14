@@ -48,11 +48,9 @@ const SWIPE_THRESHOLD = 60;
 /** How many cards to keep rendered behind the top card in stack mode. */
 const STACK_DEPTH = 3;
 
-/** Grade abre por padrão no desktop; pilha (arrastável) no mobile. */
+/** Pilha (arrastável) por padrão — fica centralizada na viewport como os
+ *  mockups das seções de parallax. Grade/Lista continuam disponíveis no toggle. */
 function responsiveDefaultLayout(): LayoutMode {
-  if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
-    return "grid";
-  }
   return "stack";
 }
 

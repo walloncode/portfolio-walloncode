@@ -18,7 +18,9 @@ const cards: MorphCard[] = orderedProjects.map((p) => ({
 
 export function SelectedWork() {
   return (
-    <section id="work" className="relative py-20 md:py-24">
+    <section id="work" className="relative py-20 md:py-28">
+      {/* Compact stack (default) keeps the intro, toggle and pile together as one
+          unit between the two parallax sections — no oversized blank band. */}
       <Container>
         <Reveal delay={0.05}>
           <p className="mx-auto mb-12 max-w-sm text-center text-sm text-foreground-subtle">
