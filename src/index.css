@@ -122,6 +122,15 @@ body {
   50% { opacity: 1; }
 }
 
+/* Journey — spinner that resolves into the orbit ring */
+@keyframes journey-spin {
+  to { transform: rotate(360deg); }
+}
+.journey-loader--spin {
+  animation: journey-spin 1s linear infinite;
+  transform-origin: 50% 50%;
+}
+
 .anim-float { animation: floatY 7s ease-in-out infinite; }
 .anim-float-delayed { animation: floatY 8s ease-in-out infinite 1.2s; }
 .anim-float-slow { animation: floatYReverse 9s ease-in-out infinite 0.5s; }

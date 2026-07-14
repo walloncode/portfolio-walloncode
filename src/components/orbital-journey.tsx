@@ -15,6 +15,9 @@ export function OrbitalJourney({ nodes }: { nodes: JourneyNode[] }) {
   const [rotation, setRotation] = useState(0);
   const [autoRotate, setAutoRotate] = useState(true);
   const [radius, setRadius] = useState(200);
+  // Loading choreography: a spinner spins until the section scrolls into view,
+  // "seals" into a full ring, then reveals the orbit. "sealing" bridges the two.
+  const [phase, setPhase] = useState<"loading" | "sealing" | "done">("loading");
 
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -68,6 +71,39 @@ export function OrbitalJourney({ nodes }: { nodes: JourneyNode[] }) {
     };
   }, [autoRotate]);
 
+  // Loading choreography: spin while offscreen, seal into the ring + reveal on view
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setPhase("done");
+      return;
+    }
+    const el = containerRef.current;
+    if (!el) {
+      setPhase("done");
+      return;
+    }
+    let seal = 0;
+    let reveal = 0;
+    let started = false;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !started) {
+          started = true;
+          io.disconnect();
+          seal = window.setTimeout(() => setPhase("sealing"), 1300);
+          reveal = window.setTimeout(() => setPhase("done"), 1900);
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      clearTimeout(seal);
+      clearTimeout(reveal);
+    };
+  }, []);
+
   const centerOnNode = useCallback(
     (id: number) => {
       const index = nodes.findIndex((n) => n.id === id);
@@ -119,7 +155,54 @@ export function OrbitalJourney({ nodes }: { nodes: JourneyNode[] }) {
       onClick={reset}
       className="relative mx-auto flex h-[500px] w-full max-w-4xl items-center justify-center sm:h-[560px]"
     >
-      <div ref={stageRef} className="absolute inset-0 flex items-center justify-center">
+      {/* Loading spinner that seals into the orbit ring, then fades out */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 100 100"
+        className={cn(
+          "pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 overflow-visible transition-opacity duration-700",
+          phase === "loading" && "journey-loader--spin",
+        )}
+        style={{
+          width: radius * 2,
+          height: radius * 2,
+          opacity: phase === "done" ? 0 : 1,
+        }}
+      >
+        <circle
+          cx="50"
+          cy="50"
+          r="48.5"
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth={1.5}
+          vectorEffect="non-scaling-stroke"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="48.5"
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth={2}
+          strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
+          style={{
+            strokeDasharray: phase === "loading" ? "70 235" : "305 0",
+            transition: "stroke-dasharray 0.55s var(--ease-out-quart)",
+            filter: "drop-shadow(0 0 6px rgba(91,108,255,0.5))",
+          }}
+        />
+      </svg>
+
+      <div
+        ref={stageRef}
+        className="absolute inset-0 flex items-center justify-center transition-all duration-700 ease-[var(--ease-out-quart)]"
+        style={{
+          opacity: phase === "done" ? 1 : 0,
+          transform: `scale(${phase === "done" ? 1 : 0.92})`,
+        }}
+      >
         {/* Core */}
         <div className="pointer-events-none absolute z-10 flex h-16 w-16 items-center justify-center">
           <div className="absolute h-16 w-16 animate-ping rounded-full border border-accent/30 opacity-70" />
