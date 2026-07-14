@@ -35,10 +35,13 @@ export function Hero() {
       id="hero"
       className="relative min-h-[100svh] overflow-hidden"
     >
-      {/* Flowing-lines background */}
+      {/* Flowing-lines background. The whole layer is masked to fade out toward
+          the bottom so the lines dissolve into the shared global BackgroundField
+          (which continues, unchanged, into the work section) instead of being
+          painted over with solid canvas — that hard mask was the visible seam. */}
       <motion.div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-[1]"
+        className="pointer-events-none absolute inset-0 -z-[1] [mask-image:linear-gradient(to_bottom,black_45%,transparent_82%)] [-webkit-mask-image:linear-gradient(to_bottom,black_45%,transparent_82%)]"
         style={prefersReducedMotion ? undefined : { opacity: shaderOpacity }}
       >
         <FloatingLines
@@ -52,8 +55,7 @@ export function Hero() {
           parallax={!prefersReducedMotion}
           animationSpeed={prefersReducedMotion ? 0 : 1}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(120%_75%_at_50%_0%,transparent_45%,var(--color-canvas)_100%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-canvas to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(120%_75%_at_50%_0%,transparent_55%,var(--color-canvas)_100%)]" />
       </motion.div>
 
       <Container className="relative z-30 flex min-h-[100svh] flex-col pb-8 pt-24">
@@ -156,13 +158,6 @@ export function Hero() {
           </motion.div>
         </div>
       </Container>
-
-      {/* Fade the hero (figure + animated background) down into the canvas so it
-          dissolves smoothly into the work section — no hard seam. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-48 bg-gradient-to-t from-canvas via-canvas/85 to-transparent md:h-64"
-      />
 
       {!prefersReducedMotion && (
         <motion.div
