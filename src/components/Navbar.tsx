@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
-import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { fadeUp, staggerContainer } from "@/lib/motion";
@@ -22,6 +21,8 @@ const menuSpring = { type: "spring", stiffness: 420, damping: 34 } as const;
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const desktopRef = useRef<HTMLElement>(null);
+  const mobileRef = useRef<HTMLElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -32,15 +33,23 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // close the mobile menu on route change
+  // close the menu on route change
   useEffect(() => setOpen(false), [location.pathname]);
 
-  // close on Escape while open
+  // close on Escape / click-outside while open
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!desktopRef.current?.contains(t) && !mobileRef.current?.contains(t)) setOpen(false);
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("mousedown", onDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("mousedown", onDown);
+    };
   }, [open]);
 
   const goToSection = (hash: string) => (e: React.MouseEvent) => {
@@ -50,9 +59,6 @@ export function Navbar() {
       navigate(`/#${hash}`);
       return;
     }
-    // Close the mobile menu first, then scroll on the next tick — running the
-    // smooth scroll in the same synchronous step as setOpen lets the menu's
-    // close/layout animation swallow it, so the page never moves on mobile.
     setOpen(false);
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -61,95 +67,106 @@ export function Navbar() {
     });
   };
 
-  // shrink the mobile bar once scrolled — until the user opens it again
+  // Collapsed to just the logo once scrolled — until the user opens it again.
+  // At the top of the page it comes expanded.
   const compact = scrolled && !open;
   const glass =
     "bg-canvas/70 backdrop-blur-xl backdrop-saturate-150 shadow-[var(--shadow-glass)] border-white/[0.08]";
 
+  const logo = (size: string) => (
+    <img
+      src={wallonMark}
+      alt="WALLONCODE"
+      draggable={false}
+      className={cn(
+        "rounded-full ring-1 transition-all duration-300 group-hover:scale-105",
+        size,
+        open ? "ring-accent" : "ring-accent-border",
+      )}
+    />
+  );
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-      {/* Desktop — static pill */}
-      <nav
+      {/* Desktop — the logo IS the button; it expands horizontally into the menu
+          and collapses to just the logo on scroll. */}
+      <motion.nav
+        ref={desktopRef}
+        layout
+        transition={menuSpring}
         className={cn(
-          "hidden w-full max-w-[880px] items-center justify-between rounded-full border px-4 py-2.5 transition-all duration-300 ease-[var(--ease-out-quart)] md:flex",
+          "hidden items-center gap-1 rounded-full border p-1.5 md:flex",
           scrolled ? glass : "border-transparent bg-transparent",
         )}
       >
-        <Link to="/" className="group flex items-center gap-2">
-          <img
-            src={wallonMark}
-            alt="WALLONCODE"
-            draggable={false}
-            className="size-7 rounded-full ring-1 ring-accent-border transition-transform duration-300 group-hover:scale-110"
-          />
-          <span className="font-mono text-sm font-medium tracking-tight text-foreground transition-colors group-hover:text-accent-hover">
-            Walloncode
-          </span>
-        </Link>
+        <button
+          type="button"
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={!compact}
+          onClick={() => setOpen((v) => !v)}
+          className="group grid shrink-0 place-items-center rounded-full active:scale-95"
+        >
+          {logo(compact ? "size-9" : "size-8")}
+        </button>
 
-        <ul className="flex items-center gap-1">
-          {NAV_ITEMS.map((item) => (
-            <li key={item.hash}>
-              <a
-                href={`/#${item.hash}`}
-                onClick={goToSection(item.hash)}
-                className="rounded-full px-3.5 py-1.5 text-[13px] font-medium text-foreground-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-foreground"
+        <AnimatePresence initial={false}>
+          {!compact && (
+            <motion.div
+              key="items"
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-1 overflow-hidden pl-1"
+            >
+              <ul className="flex items-center gap-1">
+                {NAV_ITEMS.map((item) => (
+                  <li key={item.hash}>
+                    <a
+                      href={`/#${item.hash}`}
+                      onClick={goToSection(item.hash)}
+                      className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium text-foreground-muted transition-colors duration-200 hover:bg-white/[0.06] hover:text-foreground"
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={goToSection("contact")}
+                className="ml-1 shrink-0 rounded-full"
               >
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
+                Contato
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
-        <Button variant="accent" size="sm" onClick={goToSection("contact")} className="rounded-full">
-          Contato
-        </Button>
-      </nav>
-
-      {/* Mobile — shrinks on scroll, opens on tap */}
+      {/* Mobile — logo toggles a vertical dropdown (items in a row don't fit). */}
       <motion.nav
+        ref={mobileRef}
         layout
         transition={menuSpring}
         className={cn(
           "flex flex-col overflow-hidden rounded-3xl border md:hidden",
           scrolled || open ? glass : "border-transparent bg-transparent",
-          compact ? "w-auto" : "w-full max-w-[480px]",
+          open ? "w-full max-w-[420px]" : "w-auto",
         )}
       >
-        <motion.div layout className="flex items-center justify-between gap-3 px-3 py-2">
-          {!compact && (
-            <Link to="/" className="flex items-center gap-2 pl-1">
-              <img
-                src={wallonMark}
-                alt="WALLONCODE"
-                draggable={false}
-                className="size-6 rounded-full ring-1 ring-accent-border"
-              />
-              <span className="whitespace-nowrap font-mono text-sm font-medium tracking-tight text-foreground">
-                wellyson.dev
-              </span>
-            </Link>
-          )}
+        <motion.div layout className="flex items-center justify-center p-2">
           <button
             type="button"
             aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
-            className="grid size-9 shrink-0 place-items-center rounded-full border border-white/10 bg-white/5 text-foreground backdrop-blur-sm transition-colors hover:bg-white/10 active:scale-95"
+            className="group grid place-items-center rounded-full active:scale-95"
           >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={open ? "close" : "open"}
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.18 }}
-                className="grid place-items-center"
-              >
-                {open ? <X className="size-4.5" /> : <Menu className="size-4.5" />}
-              </motion.span>
-            </AnimatePresence>
+            {logo(compact ? "size-9" : "size-8")}
           </button>
         </motion.div>
 
