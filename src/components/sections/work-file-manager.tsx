@@ -308,13 +308,6 @@ function FileManagerPortal() {
 
   return (
     <section ref={sectionRef} id="work-intro" className="relative h-[180vh] md:h-[320vh]">
-      {/* Seam bridge — an indigo wash (hero palette) straddling the boundary so
-          the hero's animated background dissolves into this section instead of
-          cutting hard into flat canvas. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-[1] h-[45vh] -translate-y-1/2 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(91,108,255,0.16),transparent_72%)]"
-      />
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
         {/* ambient glow */}
         <motion.div
@@ -365,10 +358,6 @@ function FileManagerPortal() {
 function FileManagerStatic() {
   return (
     <section id="work-intro" className="relative flex min-h-[70vh] items-center justify-center py-20">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-[1] h-[40vh] -translate-y-1/2 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(91,108,255,0.16),transparent_72%)]"
-      />
       <div className="px-4">
         <Finder phase={2} showCursor={false} />
       </div>
