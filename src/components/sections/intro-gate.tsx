@@ -27,7 +27,7 @@ function NameMarquee() {
     >
       {/* Two identical tracks side by side: the pair scrolls exactly one track
           width, so the seam never lands inside the viewport. */}
-      <div className="flex w-max animate-[marquee-x_38s_linear_infinite] whitespace-nowrap font-display text-[72px] font-bold leading-none tracking-tight will-change-transform">
+      <div className="flex w-max animate-[marquee-x_38s_linear_infinite] whitespace-nowrap font-display text-[60px] font-bold leading-none tracking-tight will-change-transform">
         <div className="flex shrink-0 items-center">{items}</div>
         <div className="flex shrink-0 items-center">{items}</div>
       </div>
