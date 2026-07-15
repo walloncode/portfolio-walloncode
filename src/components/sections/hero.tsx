@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { FloatingLines } from "@/components/background/floating-lines";
@@ -11,7 +11,31 @@ const NAME = "Wellyson";
 
 export function Hero() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const portraitRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  // Spotlight that un-dims the portrait under the cursor. Tracked on the window
+  // because the portrait sits in a pointer-events-none layer and would never
+  // receive its own pointer events.
+  useEffect(() => {
+    const el = portraitRef.current;
+    if (!el) return;
+    let frame = 0;
+    const onMove = (e: PointerEvent) => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty("--px", `${e.clientX - r.left}px`);
+        el.style.setProperty("--py", `${e.clientY - r.top}px`);
+      });
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", onMove);
+    };
+  }, []);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -147,12 +171,26 @@ export function Hero() {
             style={prefersReducedMotion ? undefined : { y: portraitY }}
             className="pointer-events-none order-1 flex h-full items-end justify-center md:order-2 md:justify-end"
           >
-            <img
-              src={portrait}
-              alt="Wellyson Caetano"
-              fetchPriority="high"
-              className="h-[52vh] max-h-[720px] w-auto object-contain object-bottom drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)] md:h-[76vh]"
-            />
+            {/* Dark photo underneath, full-colour copy on top revealed only
+                inside the cursor's radial mask. The shadow lives on the wrapper
+                so the dim filter can't replace it. */}
+            <div
+              ref={portraitRef}
+              className="portrait-spotlight relative drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
+            >
+              <img
+                src={portrait}
+                alt="Wellyson Caetano"
+                fetchPriority="high"
+                className="portrait-base h-[52vh] max-h-[720px] w-auto object-contain object-bottom md:h-[76vh]"
+              />
+              <img
+                src={portrait}
+                alt=""
+                aria-hidden="true"
+                className="portrait-reveal absolute inset-0 h-full w-full object-contain object-bottom"
+              />
+            </div>
           </motion.div>
         </div>
       </Container>

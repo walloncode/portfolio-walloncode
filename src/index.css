@@ -102,6 +102,38 @@ body {
   border-radius: 2px;
 }
 
+/* Hero portrait — dark until the cursor sweeps across it, revealing the photo
+   inside a radial spotlight. Gated on a real pointer: with no mouse there is
+   nothing to reveal with, so touch gets the plain photo. */
+.portrait-spotlight .portrait-reveal {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* No :hover here — the portrait sits in a pointer-events-none layer and
+     never receives hover. The cursor mask below is what does the reveal. */
+  .portrait-spotlight .portrait-base {
+    filter: brightness(0.28) saturate(0.35);
+  }
+  .portrait-spotlight .portrait-reveal {
+    display: block;
+    /* Defaults park the circle off-image, so it starts fully dark. */
+    --spot: 200px;
+    -webkit-mask-image: radial-gradient(
+      circle var(--spot) at var(--px, -999px) var(--py, -999px),
+      #000 0%,
+      #000 36%,
+      transparent 72%
+    );
+    mask-image: radial-gradient(
+      circle var(--spot) at var(--px, -999px) var(--py, -999px),
+      #000 0%,
+      #000 36%,
+      transparent 72%
+    );
+  }
+}
+
 /* Intro gate — looping name marquee and the black-hole accretion ring.
    The track holds two identical copies, so -50% lands on a seamless repeat. */
 @keyframes marquee-x {
