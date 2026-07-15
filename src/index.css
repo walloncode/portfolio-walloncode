@@ -102,6 +102,23 @@ body {
   border-radius: 2px;
 }
 
+/* Intro gate — looping name marquee and the black-hole accretion ring.
+   The track holds two identical copies, so -50% lands on a seamless repeat. */
+@keyframes marquee-x {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes bh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[marquee-x_38s_linear_infinite\],
+  .animate-\[bh-spin_2\.4s_linear_infinite\] {
+    animation: none;
+  }
+}
+
 /* Floating scene animations — About / "how I work" */
 @keyframes floatY {
   0%, 100% { transform: translateY(0) rotate(0deg); }

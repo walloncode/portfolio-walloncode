@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
+import { IntroGate } from "@/components/sections/intro-gate";
 import { Hero } from "@/components/sections/hero";
 import { WorkFileManager } from "@/components/sections/work-file-manager";
 import { SelectedWork } from "@/components/sections/selected-work";
@@ -17,8 +19,24 @@ const TITLE = "Wellyson Caetano — Software Engineer";
 const DESCRIPTION = profile.heroTagline;
 
 export function Home() {
+  const [introDone, setIntroDone] = useState(false);
+
+  // The gate owns the viewport until it hands over — scrolling underneath it
+  // would leave the visitor mid-page when the black hole opens.
+  useEffect(() => {
+    if (introDone) return;
+    window.scrollTo(0, 0);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [introDone]);
+
   return (
     <>
+      {!introDone && <IntroGate onFinish={() => setIntroDone(true)} />}
+
       <Helmet>
         <title>{TITLE}</title>
         <meta name="description" content={DESCRIPTION} />

@@ -23,6 +23,12 @@ interface SplitTextProps {
   threshold?: number;
   rootMargin?: string;
   textAlign?: CSSProperties["textAlign"];
+  /**
+   * Play as soon as the text is split instead of waiting for a ScrollTrigger.
+   * Needed for text that never scrolls into view — inside a fixed overlay, or
+   * while the page is scroll-locked, a ScrollTrigger may never fire.
+   */
+  playOnMount?: boolean;
   onLetterAnimationComplete?: () => void;
 }
 
@@ -39,6 +45,7 @@ export function SplitText({
   threshold = 0.1,
   rootMargin = "-100px",
   textAlign = "center",
+  playOnMount = false,
   onLetterAnimationComplete,
 }: SplitTextProps) {
   const ref = useRef<HTMLElement>(null);
@@ -111,13 +118,17 @@ export function SplitText({
               duration,
               ease,
               stagger: delay / 1000,
-              scrollTrigger: {
-                trigger: el,
-                start,
-                once: true,
-                fastScrollEnd: true,
-                anticipatePin: 0.4,
-              },
+              ...(playOnMount
+                ? null
+                : {
+                    scrollTrigger: {
+                      trigger: el,
+                      start,
+                      once: true,
+                      fastScrollEnd: true,
+                      anticipatePin: 0.4,
+                    },
+                  }),
               onComplete: () => {
                 animationCompletedRef.current = true;
                 onCompleteRef.current?.();
@@ -155,6 +166,7 @@ export function SplitText({
         JSON.stringify(to),
         threshold,
         rootMargin,
+        playOnMount,
         fontsLoaded,
       ],
       scope: ref,
