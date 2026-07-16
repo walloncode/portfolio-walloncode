@@ -20,28 +20,28 @@ export const STEPS: Step[] = [
     icon: Compass,
     label: "Entender",
     body: "Modelo o problema antes da primeira linha — quem usa e em que condição, inclusive sem internet.",
-    scene: "top-[11%] left-[8%] w-52",
+    scene: "top-[6%] left-[6%] w-52",
     anim: "anim-float",
   },
   {
     icon: LayoutTemplate,
     label: "Arquitetar",
     body: "Separo o que precisa ser determinístico do que se beneficia de IA. Decisões explícitas e auditáveis.",
-    scene: "top-[39%] left-[31%] w-60",
+    scene: "top-[31%] right-[6%] w-56",
     anim: "anim-float-delayed",
   },
   {
     icon: Lock,
     label: "Blindar",
     body: "Segurança no escopo inicial: isolamento, brute-force, headers. Nunca como adendo.",
-    scene: "top-[60%] right-[7%] w-56",
+    scene: "top-[56%] left-[7%] w-56",
     anim: "anim-float-slow",
   },
   {
     icon: Rocket,
     label: "Entregar",
     body: "Produto no ar para cliente real, mensurável. O que não roda, não sobe.",
-    scene: "bottom-[8%] left-[15%] w-52",
+    scene: "bottom-[6%] right-[7%] w-52",
     anim: "anim-drift",
   },
 ];
@@ -185,23 +185,6 @@ export function About() {
                       <p className="text-sm leading-snug text-foreground-muted">{step.body}</p>
                     </div>
                   ))}
-
-                  {/* central cursor */}
-                  <div className="pointer-events-none absolute left-[56%] top-[47%] -translate-x-1/2 -translate-y-1/2">
-                    <div className="relative">
-                      <div
-                        className={cn(
-                          "flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/5 shadow-[0_0_20px_rgba(255,255,255,0.15)] backdrop-blur-sm",
-                          reduce ? "" : "anim-float",
-                        )}
-                      >
-                        <div className="size-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-                      </div>
-                      <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-foreground-subtle opacity-70">
-                        compilando…
-                      </span>
-                    </div>
-                  </div>
                 </div>
               </div>
 

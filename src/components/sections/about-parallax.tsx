@@ -40,11 +40,6 @@ const pop: Variants = {
   }),
 };
 
-const fade: Variants = {
-  hidden: { opacity: 0 },
-  show: (delay: number = 0) => ({ opacity: 1, transition: { duration: 0.5, delay } }),
-};
-
 /** One floating step card. The reveal lives on the positioned wrapper so the
  *  inner card keeps its idle float animation. */
 function SceneCard({ step, delay }: { step: Step; delay: number }) {
@@ -129,22 +124,6 @@ function AboutPortal() {
                 {STEPS.map((step, i) => (
                   <SceneCard key={step.label} step={step} delay={0.35 + i * 0.12} />
                 ))}
-
-                {/* central cursor */}
-                <motion.div
-                  variants={fade}
-                  custom={0.45}
-                  className="pointer-events-none absolute left-[56%] top-[47%] -translate-x-1/2 -translate-y-1/2"
-                >
-                  <div className="relative">
-                    <div className="anim-float flex size-8 items-center justify-center rounded-full border border-white/20 bg-white/5 shadow-[0_0_20px_rgba(255,255,255,0.15)] backdrop-blur-sm">
-                      <div className="size-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
-                    </div>
-                    <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] text-foreground-subtle opacity-70">
-                      compilando…
-                    </span>
-                  </div>
-                </motion.div>
               </div>
             </div>
           </motion.div>
