@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
+  AnimatePresence,
   animate,
   motion,
   useAnimationFrame,
@@ -99,26 +100,27 @@ function SkillsIntro({
 
 const cardViewport = { once: false, amount: 0.35 } as const;
 
-/** Extra width (px) the card grows to when hovered on the looping track. */
-const CARD_EXPAND = 50;
-
 function GroupCard({
   group,
   index,
   layout = "track",
   expanded = false,
   reveal = true,
+  hidden = false,
   onMouseEnter,
   onMouseLeave,
 }: {
   group: SkillGroup;
   index: number;
   layout?: "track" | "grid";
-  /** track only — hovered card grows and its text scales up */
+  /** hovered/focused card renders bigger text (used by the centered overlay) */
   expanded?: boolean;
   /** grid uses the whileInView stagger; the looping track renders statically */
   reveal?: boolean;
-  onMouseEnter?: () => void;
+  /** track only — the in-track card of the focused group is hidden while its
+   *  clone sits at the center of the screen */
+  hidden?: boolean;
+  onMouseEnter?: (e: React.MouseEvent) => void;
   onMouseLeave?: () => void;
 }) {
   const Icon = group.icon;
@@ -142,12 +144,12 @@ function GroupCard({
       {...revealProps}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      style={isTrack && expanded ? { width: `calc(26rem + ${CARD_EXPAND}px)` } : undefined}
       className={cn(
         "relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] border bg-white/[0.03] p-8 backdrop-blur-md",
-        "shadow-[var(--shadow-glass)] transition-[width,border-color,box-shadow] duration-300 ease-out md:p-10",
+        "shadow-[var(--shadow-glass)] transition-[border-color,box-shadow,opacity] duration-300 ease-out md:p-10",
         expanded ? "border-accent-border shadow-[0_30px_80px_-20px_rgba(124,92,255,0.35)]" : "border-white/[0.08]",
         isTrack ? "w-[78vw] shrink-0 sm:w-[26rem]" : "w-full",
+        hidden && "opacity-0",
       )}
     >
       {/* soft glow that echoes the accent, stronger on the first cards */}
@@ -302,8 +304,18 @@ export function SkillsSection() {
   const setWidthRef = useRef(0);
   const speedRef = useRef(0); // eased current speed (px/s)
   const factorRef = useRef(1); // proximity multiplier (1 far → MIN_FACTOR near)
-  const hoveredRef = useRef(false);
-  const [hoveredTitle, setHoveredTitle] = useState<string | null>(null);
+
+  // Focus state: the hovered card lifts out of the track and flies to the
+  // center of the screen. `focus` drives the centered overlay; `hiddenTitle`
+  // keeps the in-track original invisible (and the loop frozen) from the moment
+  // it lifts until the clone has fully collapsed back.
+  const [focus, setFocus] = useState<{
+    group: SkillGroup;
+    index: number;
+    rect: DOMRect;
+  } | null>(null);
+  const [hiddenTitle, setHiddenTitle] = useState<string | null>(null);
+  const frozenRef = useRef(false);
 
   // Measure the width of one card set so the second copy can seamlessly wrap.
   useLayoutEffect(() => {
@@ -325,7 +337,7 @@ export function SkillsSection() {
     if (!setW) return;
 
     const dt = Math.min(delta, 64) / 1000;
-    const targetSpeed = hoveredRef.current ? 0 : LOOP_SPEED * factorRef.current;
+    const targetSpeed = frozenRef.current ? 0 : LOOP_SPEED * factorRef.current;
     // ease the current speed toward the target so slow-downs/stops feel smooth
     speedRef.current += (targetSpeed - speedRef.current) * Math.min(1, dt * 6);
 
@@ -349,13 +361,20 @@ export function SkillsSection() {
     factorRef.current = 1;
   };
 
-  const onCardEnter = (title: string) => {
-    hoveredRef.current = true;
-    setHoveredTitle(title);
+  const onCardEnter = (group: SkillGroup, index: number, e: React.MouseEvent) => {
+    // freeze the loop and hide the original the instant it lifts out
+    frozenRef.current = true;
+    setHiddenTitle(group.title);
+    setFocus({ group, index, rect: e.currentTarget.getBoundingClientRect() });
   };
   const onCardLeave = () => {
-    hoveredRef.current = false;
-    setHoveredTitle(null);
+    // start the collapse; the loop stays frozen and the original stays hidden
+    // until the clone finishes shrinking back (onExitComplete).
+    setFocus(null);
+  };
+  const onFocusExited = () => {
+    frozenRef.current = false;
+    setHiddenTitle(null);
   };
 
   if (prefersReducedMotion || isMobile) {
@@ -369,11 +388,23 @@ export function SkillsSection() {
         group={group}
         index={i}
         reveal={false}
-        expanded={hoveredTitle === group.title}
-        onMouseEnter={() => onCardEnter(group.title)}
+        hidden={hiddenTitle === group.title}
+        onMouseEnter={(e) => onCardEnter(group, i, e)}
         onMouseLeave={onCardLeave}
       />
     ));
+
+  // Where the centered clone should sit at rest, and the transform that places
+  // it back over its origin card so it can grow out / shrink back.
+  const overlayWidth =
+    typeof window !== "undefined" ? Math.min(560, window.innerWidth * 0.9) : 560;
+  const originTransform = focus
+    ? {
+        x: focus.rect.left + focus.rect.width / 2 - window.innerWidth / 2,
+        y: focus.rect.top + focus.rect.height / 2 - window.innerHeight / 2,
+        scale: focus.rect.width / overlayWidth,
+      }
+    : { x: 0, y: 0, scale: 1 };
 
   return (
     <section
@@ -445,6 +476,26 @@ export function SkillsSection() {
           </div>
         </motion.div>
       </div>
+
+      {/* Focused card — flies out of the track to the center of the screen and
+          shrinks back on leave. Purely visual (the in-track slot keeps the
+          hover), so it never steals the pointer. */}
+      <AnimatePresence onExitComplete={onFocusExited}>
+        {focus && (
+          <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center px-4">
+            <motion.div
+              key={focus.group.title}
+              style={{ width: overlayWidth }}
+              initial={{ ...originTransform, opacity: 1 }}
+              animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
+              exit={{ ...originTransform, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 240, damping: 28, mass: 0.9 }}
+            >
+              <GroupCard group={focus.group} index={focus.index} layout="grid" reveal={false} expanded />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
