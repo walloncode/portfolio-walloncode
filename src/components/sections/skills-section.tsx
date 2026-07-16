@@ -146,9 +146,11 @@ function GroupCard({
       onMouseLeave={onMouseLeave}
       className={cn(
         "relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] border bg-white/[0.03] p-8 backdrop-blur-md",
-        "shadow-[var(--shadow-glass)] transition-[border-color,box-shadow,opacity] duration-300 ease-out md:p-10",
+        "shadow-[var(--shadow-glass)] transition-[border-color,box-shadow] duration-300 ease-out md:p-10",
         expanded ? "border-accent-border shadow-[0_30px_80px_-20px_rgba(124,92,255,0.35)]" : "border-white/[0.08]",
         isTrack ? "w-[78vw] shrink-0 sm:w-[26rem]" : "w-full",
+        // hidden must be instant (no fade) so the original vanishes the moment
+        // its clone lifts off toward the center, not lingering behind it.
         hidden && "opacity-0",
       )}
     >
