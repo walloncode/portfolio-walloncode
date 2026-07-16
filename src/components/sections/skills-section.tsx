@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   animate,
   motion,
+  useAnimationFrame,
   useInView,
   useMotionValue,
   useTransform,
@@ -13,6 +14,8 @@ import { Container } from "@/components/ui/container";
 import { skillGroups, type SkillGroup } from "@/content/skills";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 import { cn } from "@/lib/utils";
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 interface HandoffTarget {
   x: number;
@@ -96,26 +99,55 @@ function SkillsIntro({
 
 const cardViewport = { once: false, amount: 0.35 } as const;
 
+/** Extra width (px) the card grows to when hovered on the looping track. */
+const CARD_EXPAND = 50;
+
 function GroupCard({
   group,
   index,
   layout = "track",
+  expanded = false,
+  reveal = true,
+  onMouseEnter,
+  onMouseLeave,
 }: {
   group: SkillGroup;
   index: number;
   layout?: "track" | "grid";
+  /** track only — hovered card grows and its text scales up */
+  expanded?: boolean;
+  /** grid uses the whileInView stagger; the looping track renders statically */
+  reveal?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }) {
   const Icon = group.icon;
+  const isTrack = layout === "track";
+  const revealProps = reveal
+    ? {
+        initial: "hidden" as const,
+        whileInView: "visible" as const,
+        viewport: cardViewport,
+        variants: staggerContainer(0.06, 0.05),
+      }
+    : {};
+
+  const itemClass = cn(
+    "rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5 text-foreground-muted transition-all duration-200 hover:border-accent-border hover:bg-accent-soft hover:text-foreground",
+    expanded ? "text-base" : "text-sm",
+  );
+
   return (
     <motion.article
-      initial="hidden"
-      whileInView="visible"
-      viewport={cardViewport}
-      variants={staggerContainer(0.06, 0.05)}
+      {...revealProps}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={isTrack && expanded ? { width: `calc(26rem + ${CARD_EXPAND}px)` } : undefined}
       className={cn(
-        "relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-white/[0.03] p-8 backdrop-blur-md",
-        "shadow-[var(--shadow-glass)] md:p-10",
-        layout === "track" ? "w-[78vw] shrink-0 sm:w-[26rem]" : "w-full",
+        "relative flex flex-col justify-between overflow-hidden rounded-[1.75rem] border bg-white/[0.03] p-8 backdrop-blur-md",
+        "shadow-[var(--shadow-glass)] transition-[width,border-color,box-shadow] duration-300 ease-out md:p-10",
+        expanded ? "border-accent-border shadow-[0_30px_80px_-20px_rgba(124,92,255,0.35)]" : "border-white/[0.08]",
+        isTrack ? "w-[78vw] shrink-0 sm:w-[26rem]" : "w-full",
       )}
     >
       {/* soft glow that echoes the accent, stronger on the first cards */}
@@ -138,22 +170,36 @@ function GroupCard({
           </span>
         </div>
 
-        <h3 className="mt-6 font-display text-2xl font-semibold tracking-tight text-foreground md:text-[1.75rem]">
+        <h3
+          className={cn(
+            "mt-6 font-display font-semibold tracking-tight text-foreground transition-all duration-300",
+            expanded ? "text-3xl md:text-[2.15rem]" : "text-2xl md:text-[1.75rem]",
+          )}
+        >
           {group.title}
         </h3>
-        <p className="mt-1.5 text-sm text-foreground-subtle">{group.caption}</p>
+        <p
+          className={cn(
+            "mt-1.5 text-foreground-subtle transition-all duration-300",
+            expanded ? "text-base" : "text-sm",
+          )}
+        >
+          {group.caption}
+        </p>
       </div>
 
       <ul className="relative mt-8 flex flex-wrap gap-2.5">
-        {group.items.map((item) => (
-          <motion.li
-            key={item}
-            variants={fadeUp}
-            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5 text-sm text-foreground-muted transition-colors duration-200 hover:border-accent-border hover:bg-accent-soft hover:text-foreground"
-          >
-            {item}
-          </motion.li>
-        ))}
+        {group.items.map((item) =>
+          reveal ? (
+            <motion.li key={item} variants={fadeUp} className={itemClass}>
+              {item}
+            </motion.li>
+          ) : (
+            <li key={item} className={itemClass}>
+              {item}
+            </li>
+          ),
+        )}
       </ul>
     </motion.article>
   );
@@ -179,6 +225,14 @@ function SkillsGrid() {
     </section>
   );
 }
+
+/** Base loop speed (px/s) once the mouse is far from the track. */
+const LOOP_SPEED = 55;
+/** Within this distance (px) from the track the loop starts slowing down. */
+const PROXIMITY_RANGE = 280;
+/** Slowest the loop crawls while the mouse hovers the band (never fully stops
+ *  until a card is hovered). */
+const MIN_FACTOR = 0.16;
 
 export function SkillsSection() {
   const prefersReducedMotion = useReducedMotion();
@@ -236,16 +290,98 @@ export function SkillsSection() {
     return () => window.removeEventListener("resize", measure);
   }, [prefersReducedMotion, isMobile]);
 
-  // The track fades in under the landed "Skills". It no longer slides on its
-  // own: the cards are content to read, so the reader drives them sideways.
+  // The track fades in under the landed "Skills". From there the cards loop on
+  // their own clock: they crawl left forever, ease slower as the mouse nears,
+  // and freeze on the hovered card (which grows + scales its text).
   const trackOpacity = useTransform(introProgress, [0.36, 0.46], [0, 1]);
+
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const setRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const setWidthRef = useRef(0);
+  const speedRef = useRef(0); // eased current speed (px/s)
+  const factorRef = useRef(1); // proximity multiplier (1 far → MIN_FACTOR near)
+  const hoveredRef = useRef(false);
+  const [hoveredTitle, setHoveredTitle] = useState<string | null>(null);
+
+  // Measure the width of one card set so the second copy can seamlessly wrap.
+  useLayoutEffect(() => {
+    if (prefersReducedMotion || isMobile) return;
+    const measure = () => {
+      if (setRef.current) setWidthRef.current = setRef.current.offsetWidth;
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [prefersReducedMotion, isMobile]);
+
+  useAnimationFrame((_, delta) => {
+    if (prefersReducedMotion || isMobile) return;
+    // hold still until the intro has handed off to the track
+    if (introProgress.get() < 0.46) return;
+    const setW = setWidthRef.current;
+    if (!setW) return;
+
+    const dt = Math.min(delta, 64) / 1000;
+    const targetSpeed = hoveredRef.current ? 0 : LOOP_SPEED * factorRef.current;
+    // ease the current speed toward the target so slow-downs/stops feel smooth
+    speedRef.current += (targetSpeed - speedRef.current) * Math.min(1, dt * 6);
+
+    let next = x.get() - speedRef.current * dt;
+    if (next <= -setW) next += setW;
+    x.set(next);
+  });
+
+  // Mouse proximity → slower loop. Distance is measured to the track band, so
+  // the closer the pointer gets the more it eases off.
+  const onSectionMouseMove = (e: React.MouseEvent) => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const nx = clamp(e.clientX, r.left, r.right);
+    const ny = clamp(e.clientY, r.top, r.bottom);
+    const dist = Math.hypot(e.clientX - nx, e.clientY - ny);
+    factorRef.current = clamp(dist / PROXIMITY_RANGE, MIN_FACTOR, 1);
+  };
+  const onSectionMouseLeave = () => {
+    factorRef.current = 1;
+  };
+
+  const onCardEnter = (title: string) => {
+    hoveredRef.current = true;
+    setHoveredTitle(title);
+  };
+  const onCardLeave = () => {
+    hoveredRef.current = false;
+    setHoveredTitle(null);
+  };
 
   if (prefersReducedMotion || isMobile) {
     return <SkillsGrid />;
   }
 
+  const renderSet = (dup: boolean) =>
+    skillGroups.map((group, i) => (
+      <GroupCard
+        key={dup ? `${group.title}-dup` : group.title}
+        group={group}
+        index={i}
+        reveal={false}
+        expanded={hoveredTitle === group.title}
+        onMouseEnter={() => onCardEnter(group.title)}
+        onMouseLeave={onCardLeave}
+      />
+    ));
+
   return (
-    <section ref={sectionRef} id="skills" className="relative h-screen">
+    <section
+      ref={sectionRef}
+      id="skills"
+      className="relative h-screen"
+      onMouseMove={onSectionMouseMove}
+      onMouseLeave={onSectionMouseLeave}
+    >
       <div className="flex h-full flex-col justify-center overflow-hidden">
         {/* purple ambient glow, echoing the reference panel */}
         <div
@@ -262,14 +398,12 @@ export function SkillsSection() {
           <SkillsIntro progress={introProgress} target={target} skillsRef={skillsRef} />
         )}
 
-        {/* Native horizontal scroll — the cards keep their sideways identity
-            without hijacking the page's vertical scroll to move them. */}
         <motion.div
           style={{ opacity: trackOpacity }}
-          className="flex items-stretch gap-6 overflow-x-auto overscroll-x-contain scroll-smooth pl-6 pr-[10vw] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-8 md:pl-10"
+          className="relative flex items-center gap-6 pl-6 md:gap-10 md:pl-10"
         >
-          {/* Intro panel — slides out to the left as the cards arrive from the right */}
-          <div className="flex w-[80vw] shrink-0 flex-col justify-center sm:w-[30rem]">
+          {/* Heading panel — stays put; the intro "Skills" lands on it. */}
+          <div className="flex w-[20rem] shrink-0 flex-col justify-center sm:w-[22rem]">
             <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent-hover">
               Capacidades
             </p>
@@ -277,8 +411,8 @@ export function SkillsSection() {
               Skills
             </h2>
             <p className="subtext-std mt-5 max-w-sm text-foreground-muted">
-              Role para a lateral — as capacidades entram da direita, do técnico ao
-              humano.
+              As áreas giram sozinhas — aproxime o mouse para desacelerar e passe sobre um card
+              para pausar.
             </p>
             <div className="mt-8 flex items-center gap-3 text-sm text-foreground-subtle">
               <span className="h-px w-10 bg-gradient-to-r from-accent to-transparent" />
@@ -288,9 +422,26 @@ export function SkillsSection() {
             </div>
           </div>
 
-          {skillGroups.map((group, i) => (
-            <GroupCard key={group.title} group={group} index={i} />
-          ))}
+          {/* Looping card track — infinite horizontal marquee, two seamless copies. */}
+          <div
+            ref={viewportRef}
+            className="relative min-w-0 flex-1 overflow-hidden py-4"
+            style={{
+              maskImage:
+                "linear-gradient(90deg, transparent, #000 3%, #000 92%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(90deg, transparent, #000 3%, #000 92%, transparent)",
+            }}
+          >
+            <motion.div style={{ x }} className="flex w-max items-stretch">
+              <div ref={setRef} className="flex items-stretch gap-6 pr-6 md:gap-8 md:pr-8">
+                {renderSet(false)}
+              </div>
+              <div aria-hidden="true" className="flex items-stretch gap-6 pr-6 md:gap-8 md:pr-8">
+                {renderSet(true)}
+              </div>
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
