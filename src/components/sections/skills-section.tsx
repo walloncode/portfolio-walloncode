@@ -1,7 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
+  animate,
   motion,
-  useScroll,
+  useInView,
+  useMotionValue,
   useTransform,
   useReducedMotion,
   useMotionValueEvent,
@@ -184,33 +186,35 @@ export function SkillsSection() {
     typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
 
   const sectionRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const skillsRef = useRef<HTMLSpanElement>(null);
-  const [distance, setDistance] = useState(0);
   const [target, setTarget] = useState<HandoffTarget>({ x: 0, y: 0, scale: 0.42 });
   // Once the intro has handed off to the card track, unmount the overlay
   // completely — leaving it mounted let the big words linger as ghosts behind
   // the cards for the rest of the section.
   const [introMounted, setIntroMounted] = useState(true);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
+  // The intro used to be scrubbed by the scrollbar across a 520vh section. It
+  // now runs on its own clock over the same 0→0.5 range, so every beat below
+  // keeps its original timing relative to the others.
+  const introProgress = useMotionValue(0);
+  const inView = useInView(sectionRef, { once: true, amount: 0.4 });
+  useEffect(() => {
+    if (prefersReducedMotion || isMobile || !inView) return;
+    const controls = animate(introProgress, 0.56, { duration: 3.4, ease: "linear" });
+    return () => controls.stop();
+  }, [inView, introProgress, prefersReducedMotion, isMobile]);
 
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
+  useMotionValueEvent(introProgress, "change", (v) => {
     const next = v < 0.52;
     setIntroMounted((prev) => (prev === next ? prev : next));
   });
 
-  // Measure the track slide distance + where the intro "Skills" must land so it
-  // sits exactly on the track's "Skills" heading (measured at rest, progress≈0).
+  // Measure where the intro "Skills" must land so it sits exactly on the track's
+  // "Skills" heading (measured at rest, before the track is scrolled).
   useLayoutEffect(() => {
     if (prefersReducedMotion || isMobile) return;
     const measure = () => {
-      const track = trackRef.current;
-      if (track) setDistance(Math.max(0, track.scrollWidth - window.innerWidth));
       const h = headingRef.current;
       const s = skillsRef.current;
       if (h && s) {
@@ -232,18 +236,17 @@ export function SkillsSection() {
     return () => window.removeEventListener("resize", measure);
   }, [prefersReducedMotion, isMobile]);
 
-  // The track fades in under the landed "Skills" (still stationary), then only
-  // starts sliding once the intro has fully handed off.
-  const x = useTransform(scrollYProgress, [0.5, 1], [0, -distance]);
-  const trackOpacity = useTransform(scrollYProgress, [0.36, 0.46], [0, 1]);
+  // The track fades in under the landed "Skills". It no longer slides on its
+  // own: the cards are content to read, so the reader drives them sideways.
+  const trackOpacity = useTransform(introProgress, [0.36, 0.46], [0, 1]);
 
   if (prefersReducedMotion || isMobile) {
     return <SkillsGrid />;
   }
 
   return (
-    <section ref={sectionRef} id="skills" className="relative h-[280vh] md:h-[520vh]">
-      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden">
+    <section ref={sectionRef} id="skills" className="relative h-screen">
+      <div className="flex h-full flex-col justify-center overflow-hidden">
         {/* purple ambient glow, echoing the reference panel */}
         <div
           aria-hidden="true"
@@ -256,13 +259,14 @@ export function SkillsSection() {
 
         {/* intro: S → 3 words → Skills → lands on the track heading */}
         {introMounted && (
-          <SkillsIntro progress={scrollYProgress} target={target} skillsRef={skillsRef} />
+          <SkillsIntro progress={introProgress} target={target} skillsRef={skillsRef} />
         )}
 
+        {/* Native horizontal scroll — the cards keep their sideways identity
+            without hijacking the page's vertical scroll to move them. */}
         <motion.div
-          ref={trackRef}
-          style={{ x, opacity: trackOpacity }}
-          className="flex items-stretch gap-6 pl-6 pr-[10vw] will-change-transform md:gap-8 md:pl-10"
+          style={{ opacity: trackOpacity }}
+          className="flex items-stretch gap-6 overflow-x-auto overscroll-x-contain scroll-smooth pl-6 pr-[10vw] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-8 md:pl-10"
         >
           {/* Intro panel — slides out to the left as the cards arrive from the right */}
           <div className="flex w-[80vw] shrink-0 flex-col justify-center sm:w-[30rem]">

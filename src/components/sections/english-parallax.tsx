@@ -1,18 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  useReducedMotion,
-  useMotionValueEvent,
-} from "motion/react";
+import { useState } from "react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Languages } from "lucide-react";
 import { English3DPanel } from "@/components/sections/english-3d-panel";
 import { EnglishSection, CefrScale } from "@/components/sections/english-section";
 import { english } from "@/content/english";
 import { cn } from "@/lib/utils";
 
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 /** The translator glyph — a big translate mark with an ambient glow. */
 function TranslatorGlyph({ className }: { className?: string }) {
@@ -41,107 +35,75 @@ function EnglishBoard() {
   );
 }
 
-/** Scroll-driven English intro: the translator glyph appears centered, slides
- *  to the left (and stays pinned there), while the level card + interactive
- *  panel resolve on the right. */
+/** Pops in centered, holds a beat, then travels to its left slot and shrinks.
+ *  Same journey the scrollbar used to scrub, now on its own clock. */
+const glyph: Variants = {
+  hidden: { opacity: 0, scale: 0.4, rotate: -28, x: "0vw", y: "0vh" },
+  show: {
+    opacity: 1,
+    rotate: 0,
+    scale: [0.4, 1, 0.88],
+    x: ["0vw", "0vw", "-30vw"],
+    y: ["0vh", "0vh", "-6vh"],
+    transition: {
+      opacity: { duration: 0.4, ease: "easeOut" },
+      rotate: { duration: 0.7, ease: EASE },
+      default: { duration: 1.7, times: [0, 0.38, 1], ease: EASE },
+    },
+  },
+};
+
+const title: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 1.35, ease: EASE } },
+};
+
+const board: Variants = {
+  hidden: { opacity: 0, x: 64 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.8, delay: 1.1, ease: EASE } },
+};
+
+/** Self-running English intro: the translator glyph appears centered, slides to
+ *  the left (and stays there), while the level card + interactive panel resolve
+ *  on the right. */
 function EnglishPortal() {
-  const sectionRef = useRef<HTMLDivElement>(null);
   const [boardActive, setBoardActive] = useState(false);
 
-  const scrollYProgress = useMotionValue(0);
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const rect = el.getBoundingClientRect();
-      const total = rect.height - window.innerHeight;
-      const p = total > 0 ? clamp(-rect.top / total, 0, 1) : 0;
-      scrollYProgress.set(p);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [scrollYProgress]);
-
-  useMotionValueEvent(scrollYProgress, "change", (v) => setBoardActive(v > 0.6));
-
-  // Glyph: pops in centered, then slides to the left slot and holds.
-  const glyphOpacity = useTransform(scrollYProgress, [0, 0.12], [0, 1]);
-  const glyphScale = useTransform(scrollYProgress, [0, 0.14, 0.5], [0.4, 1, 0.88]);
-  const glyphRotate = useTransform(scrollYProgress, [0, 0.16], [-28, 0]);
-  const glyphX = useTransform(scrollYProgress, [0.24, 0.5], ["0vw", "-30vw"]);
-  const glyphY = useTransform(scrollYProgress, [0.24, 0.5], ["0vh", "-6vh"]);
-
-  // Left title block fades in below the glyph once it lands.
-  const titleOpacity = useTransform(scrollYProgress, [0.5, 0.66], [0, 1]);
-  const titleY = useTransform(scrollYProgress, [0.5, 0.7], [28, 0]);
-
-  // Right board slides in.
-  const boardOpacity = useTransform(scrollYProgress, [0.44, 0.66], [0, 1]);
-  const boardX = useTransform(scrollYProgress, [0.44, 0.7], [64, 0]);
-
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
-
   return (
-    <section ref={sectionRef} id="english" className="relative h-[140vh] md:h-[240vh]">
-      <div className="sticky top-0 h-screen overflow-hidden">
+    <section id="english" className="relative overflow-hidden">
+      <motion.div
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.35 }}
+        className="relative h-screen"
+      >
         {/* translator glyph — center → left */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <motion.div
-            style={{ x: glyphX, y: glyphY, scale: glyphScale, rotate: glyphRotate, opacity: glyphOpacity }}
-            className="will-change-transform"
-          >
+          <motion.div variants={glyph} className="will-change-transform">
             <TranslatorGlyph className="size-[24vmin]" />
           </motion.div>
         </div>
 
         {/* left title, under the glyph */}
-        <motion.div
-          style={{ opacity: titleOpacity, y: titleY }}
-          className="absolute left-[7vw] top-[58%] w-[34vw] max-w-md"
-        >
+        <motion.div variants={title} className="absolute left-[7vw] top-[58%] w-[34vw] max-w-md">
           <p className="font-mono text-xs font-medium uppercase tracking-wider text-accent-hover">
             {english.eyebrow}
           </p>
-          <h2 className="title-std mt-2 text-foreground">
-            {english.title}
-          </h2>
+          <h2 className="title-std mt-2 text-foreground">{english.title}</h2>
           <p className="subtext-std mt-3 text-foreground-muted">{english.lead}</p>
         </motion.div>
 
-        {/* right board — level card + interactive panel */}
+        {/* right board — level card + interactive panel. Stays inert until it
+            has finished travelling, so clicks can't land on a moving target. */}
         <motion.div
-          style={{ opacity: boardOpacity, x: boardX, pointerEvents: boardActive ? "auto" : "none" }}
+          variants={board}
+          onAnimationComplete={() => setBoardActive(true)}
+          style={{ pointerEvents: boardActive ? "auto" : "none" }}
           className="absolute right-[4vw] top-1/2 w-[52vw] max-w-[620px] -translate-y-1/2 will-change-transform"
         >
           <EnglishBoard />
         </motion.div>
-
-        {/* scroll hint */}
-        <motion.div
-          style={{ opacity: hintOpacity }}
-          className="pointer-events-none absolute bottom-10 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 text-foreground-subtle"
-        >
-          <span className="font-mono text-xs uppercase tracking-wider">role para traduzir</span>
-          <motion.span
-            animate={{ y: [0, 7, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-lg"
-          >
-            ↓
-          </motion.span>
-        </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

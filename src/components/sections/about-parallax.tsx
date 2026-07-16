@@ -1,17 +1,8 @@
-import { useEffect, useRef } from "react";
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  useReducedMotion,
-  type MotionValue,
-} from "motion/react";
+import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Container } from "@/components/ui/container";
 import { profile } from "@/content/profile";
 import { cn } from "@/lib/utils";
 import { About, STEPS, TAGS, GLASS, StepCard, type Step } from "@/components/sections/about";
-
-const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
 const HEADING_GRADIENT = {
   backgroundImage: "linear-gradient(180deg, #ffffff 0%, #a3a3ad 100%)",
@@ -21,22 +12,48 @@ const HEADING_GRADIENT = {
   color: "transparent",
 } as const;
 
-/** One floating step card, revealed on its own scroll beat. The reveal lives on
- *  the positioned wrapper so the inner card keeps its idle float animation. */
-function SceneCard({
-  step,
-  progress,
-  start,
-}: {
-  step: Step;
-  progress: MotionValue<number>;
-  start: number;
-}) {
-  const opacity = useTransform(progress, [start, start + 0.12], [0, 1]);
-  const scale = useTransform(progress, [start, start + 0.12], [0.82, 1]);
-  const y = useTransform(progress, [start, start + 0.12], [18, 0]);
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+/** The assembly beats. Children read their delay from `custom`, which keeps the
+ *  original scroll choreography's order while running on its own clock. */
+const shell: Variants = {
+  hidden: { opacity: 0, scale: 0.93 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.8, ease: EASE } },
+};
+
+const rise: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  show: (delay: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, delay, ease: EASE },
+  }),
+};
+
+const pop: Variants = {
+  hidden: { opacity: 0, scale: 0.82, y: 18 },
+  show: (delay: number = 0) => ({
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { duration: 0.6, delay, ease: EASE },
+  }),
+};
+
+const fade: Variants = {
+  hidden: { opacity: 0 },
+  show: (delay: number = 0) => ({ opacity: 1, transition: { duration: 0.5, delay } }),
+};
+
+/** One floating step card. The reveal lives on the positioned wrapper so the
+ *  inner card keeps its idle float animation. */
+function SceneCard({ step, delay }: { step: Step; delay: number }) {
   return (
-    <motion.div style={{ opacity, scale, y }} className={cn("absolute will-change-transform", step.scene)}>
+    <motion.div
+      variants={pop}
+      custom={delay}
+      className={cn("absolute will-change-transform", step.scene)}
+    >
       <div className={cn("p-4", GLASS, step.anim)}>
         <div className="mb-3">
           <StepCard step={step} />
@@ -47,57 +64,15 @@ function SceneCard({
   );
 }
 
-/** Scroll-driven assembly: the container appears first, then the step cards
- *  inside it (staggered), and the copy last. */
+/** Self-assembling scene: the shell appears first, then the step cards inside it
+ *  (staggered), then the copy, the tags, and finally the facts. */
 function AboutPortal() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const scrollYProgress = useMotionValue(0);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const rect = el.getBoundingClientRect();
-      const total = rect.height - window.innerHeight;
-      const p = total > 0 ? clamp(-rect.top / total, 0, 1) : 0;
-      scrollYProgress.set(p);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [scrollYProgress]);
-
-  // 1. the container shell
-  const containerOpacity = useTransform(scrollYProgress, [0.03, 0.18], [0, 1]);
-  const containerScale = useTransform(scrollYProgress, [0.03, 0.2], [0.93, 1]);
-  // 2. the central cursor appears with the first cards
-  const cursorOpacity = useTransform(scrollYProgress, [0.22, 0.32], [0, 1]);
-  // 3. the copy (badge + heading + paragraph), then tags, then the facts
-  const textOpacity = useTransform(scrollYProgress, [0.56, 0.72], [0, 1]);
-  const textY = useTransform(scrollYProgress, [0.56, 0.74], [26, 0]);
-  const tagsOpacity = useTransform(scrollYProgress, [0.66, 0.8], [0, 1]);
-  const tagsY = useTransform(scrollYProgress, [0.66, 0.82], [18, 0]);
-  const factsOpacity = useTransform(scrollYProgress, [0.76, 0.9], [0, 1]);
-  const factsY = useTransform(scrollYProgress, [0.76, 0.92], [22, 0]);
-
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.08, 0.16], [1, 1, 0]);
-
   return (
-    <section ref={sectionRef} id="about" className="relative h-[140vh] md:h-[240vh]">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <Container className="w-full">
+    <section id="about" className="relative py-24 md:py-32">
+      <Container className="w-full">
+        <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
           <motion.div
-            style={{ opacity: containerOpacity, scale: containerScale }}
+            variants={shell}
             className="relative isolate overflow-hidden rounded-[2rem] border border-white/[0.07] bg-canvas-elevated shadow-[var(--shadow-elevated)] will-change-transform"
           >
             {/* ambient background */}
@@ -110,7 +85,7 @@ function AboutPortal() {
             <div className="relative z-10 flex min-h-[520px] flex-row">
               {/* Left — copy (revealed last) */}
               <div className="flex flex-1 flex-col justify-center p-8 md:p-12 lg:p-16">
-                <motion.div style={{ opacity: textOpacity, y: textY }}>
+                <motion.div variants={rise} custom={0.9}>
                   <div className="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
                     <span className="size-1.5 animate-pulse rounded-full bg-accent" />
                     <span className="text-xs font-medium uppercase tracking-wide text-foreground-muted">
@@ -126,10 +101,7 @@ function AboutPortal() {
                   </p>
                 </motion.div>
 
-                <motion.div
-                  style={{ opacity: tagsOpacity, y: tagsY }}
-                  className="mt-8 flex flex-wrap gap-3"
-                >
+                <motion.div variants={rise} custom={1.05} className="mt-8 flex flex-wrap gap-3">
                   {TAGS.map((tag) => (
                     <span
                       key={tag}
@@ -155,12 +127,13 @@ function AboutPortal() {
                   }}
                 />
                 {STEPS.map((step, i) => (
-                  <SceneCard key={step.label} step={step} progress={scrollYProgress} start={0.22 + i * 0.06} />
+                  <SceneCard key={step.label} step={step} delay={0.35 + i * 0.12} />
                 ))}
 
                 {/* central cursor */}
                 <motion.div
-                  style={{ opacity: cursorOpacity }}
+                  variants={fade}
+                  custom={0.45}
                   className="pointer-events-none absolute left-[56%] top-[47%] -translate-x-1/2 -translate-y-1/2"
                 >
                   <div className="relative">
@@ -178,7 +151,8 @@ function AboutPortal() {
 
           {/* at-a-glance facts */}
           <motion.dl
-            style={{ opacity: factsOpacity, y: factsY }}
+            variants={rise}
+            custom={1.2}
             className="mt-10 grid max-w-2xl grid-cols-1 gap-6 sm:grid-cols-3"
           >
             {profile.atAGlance.map((fact) => (
@@ -190,23 +164,8 @@ function AboutPortal() {
               </div>
             ))}
           </motion.dl>
-        </Container>
-
-        {/* scroll hint */}
-        <motion.div
-          style={{ opacity: hintOpacity }}
-          className="pointer-events-none absolute bottom-10 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 text-foreground-subtle"
-        >
-          <span className="font-mono text-xs uppercase tracking-wider">role para montar</span>
-          <motion.span
-            animate={{ y: [0, 7, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="text-lg"
-          >
-            ↓
-          </motion.span>
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

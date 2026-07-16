@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  animate,
   motion,
+  useInView,
   useMotionValue,
-  useTransform,
   useReducedMotion,
   useMotionValueEvent,
 } from "motion/react";
@@ -76,7 +77,7 @@ function BrowserWindow({ typed, loaded }: { typed: string; loaded: boolean }) {
   );
 }
 
-/** The company pitch revealed once the parallax completes. */
+/** The company pitch revealed once the intro completes. */
 function AgencyPitch() {
   return (
     <div className="mx-auto w-[min(920px,92vw)] text-center">
@@ -118,117 +119,99 @@ function AgencyPitch() {
   );
 }
 
-/** Scroll-driven typing parallax: a browser types out the WKCODE address as you
- *  scroll; when the URL lands, the page "loads" and the agency pitch rises up. */
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+/** Self-running typing intro: the browser types out the WKCODE address on its
+ *  own clock; when the URL lands the page "loads", and the computer then hands
+ *  the stage to the agency pitch. */
 function WkPortal() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [typedCount, setTypedCount] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [pitchActive, setPitchActive] = useState(false);
 
-  // Manual, viewport-agnostic scroll progress (same approach as the GitHub
-  // portal): a linear (-rect.top) / (height - viewportHeight).
-  const scrollYProgress = useMotionValue(0);
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const rect = el.getBoundingClientRect();
-      const total = rect.height - window.innerHeight;
-      const p = total > 0 ? clamp(-rect.top / total, 0, 1) : 0;
-      scrollYProgress.set(p);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      cancelAnimationFrame(raf);
-    };
-  }, [scrollYProgress]);
+  const inView = useInView(sectionRef, { once: true, amount: 0.4 });
 
-  // Characters typed track scroll across the "typing" window.
-  const charProgress = useTransform(scrollYProgress, [0.06, 0.46], [0, URL_TYPED.length]);
+  // Beat 1 — type the address, one character at a time.
+  const charProgress = useMotionValue(0);
   useMotionValueEvent(charProgress, "change", (v) => {
     setTypedCount(clamp(Math.round(v), 0, URL_TYPED.length));
   });
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    setLoaded(v > 0.5);
-    setPitchActive(v > 0.64);
-  });
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(charProgress, URL_TYPED.length, {
+      duration: 1.7,
+      delay: 0.4,
+      ease: "linear",
+    });
+    return () => controls.stop();
+  }, [inView, charProgress]);
 
-  // The computer eases up and fades out, handing the stage to the pitch —
-  // a crossfade avoids the two ever overlapping.
-  const computerScale = useTransform(scrollYProgress, [0, 0.5, 0.85], [0.94, 1, 0.86]);
-  const computerY = useTransform(scrollYProgress, [0.5, 0.85], [0, -48]);
-  const computerOpacity = useTransform(scrollYProgress, [0.6, 0.76], [1, 0]);
-  const glowScale = useTransform(scrollYProgress, [0, 0.55], [0.9, 1.5]);
-  const glowOpacity = useTransform(scrollYProgress, [0, 0.4, 0.75], [0.35, 0.6, 0.22]);
+  // Beat 2 — the typed URL resolves and the page paints.
+  useEffect(() => {
+    if (typedCount < URL_TYPED.length) return;
+    const t = setTimeout(() => setLoaded(true), 380);
+    return () => clearTimeout(t);
+  }, [typedCount]);
 
-  // Pitch rises into the center as the computer clears.
-  const pitchOpacity = useTransform(scrollYProgress, [0.64, 0.82], [0, 1]);
-  const pitchY = useTransform(scrollYProgress, [0.64, 0.9], [48, 0]);
-
-  // Hint fades once typing begins.
-  const hintOpacity = useTransform(scrollYProgress, [0, 0.1, 0.2], [1, 1, 0]);
+  // Beat 3 — the computer clears out and the pitch takes the stage.
+  useEffect(() => {
+    if (!loaded) return;
+    const t = setTimeout(() => setPitchActive(true), 1500);
+    return () => clearTimeout(t);
+  }, [loaded]);
 
   const typed = URL_TYPED.slice(0, typedCount);
 
   return (
-    <section ref={sectionRef} id="wk" className="relative h-[170vh] md:h-[300vh]">
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden">
-        {/* ambient glow */}
-        <motion.div
-          aria-hidden="true"
-          style={{ scale: glowScale, opacity: glowOpacity }}
-          className="pointer-events-none absolute size-[46vmin] rounded-full blur-[50px] sm:blur-[90px]"
-        >
-          <div className="size-full rounded-full bg-[radial-gradient(circle,rgba(91,108,255,0.85),rgba(124,92,255,0.2)_55%,transparent_72%)]" />
-        </motion.div>
+    <section
+      ref={sectionRef}
+      id="wk"
+      className="relative flex h-screen flex-col items-center justify-center overflow-hidden"
+    >
+      {/* ambient glow */}
+      <motion.div
+        aria-hidden="true"
+        initial={{ scale: 0.9, opacity: 0.35 }}
+        animate={{
+          scale: loaded ? 1.5 : 0.9,
+          opacity: pitchActive ? 0.22 : loaded ? 0.6 : 0.35,
+        }}
+        transition={{ duration: 1.2, ease: EASE }}
+        className="pointer-events-none absolute size-[46vmin] rounded-full blur-[50px] sm:blur-[90px]"
+      >
+        <div className="size-full rounded-full bg-[radial-gradient(circle,rgba(91,108,255,0.85),rgba(124,92,255,0.2)_55%,transparent_72%)]" />
+      </motion.div>
 
-        {/* the computer */}
-        <motion.div
-          style={{ scale: computerScale, y: computerY, opacity: computerOpacity }}
-          className="relative z-10 flex flex-col items-center will-change-transform"
-        >
-          <BrowserWindow typed={typed} loaded={loaded} />
-          {/* laptop base */}
-          <div className="relative -mt-px h-3 w-[min(820px,96vw)] rounded-b-xl bg-gradient-to-b from-surface to-canvas-elevated shadow-[0_18px_30px_-16px_rgba(0,0,0,0.8)]">
-            <div className="absolute left-1/2 top-0 h-1.5 w-24 -translate-x-1/2 rounded-b-lg bg-canvas/80" />
-          </div>
-        </motion.div>
+      {/* the computer — eases up and fades out, crossfading into the pitch so
+          the two never overlap */}
+      <motion.div
+        initial={{ scale: 0.94, y: 0, opacity: 1 }}
+        animate={{
+          scale: pitchActive ? 0.86 : loaded ? 1 : 0.94,
+          y: pitchActive ? -48 : 0,
+          opacity: pitchActive ? 0 : 1,
+        }}
+        transition={{ duration: 0.9, ease: EASE }}
+        className="relative z-10 flex flex-col items-center will-change-transform"
+      >
+        <BrowserWindow typed={typed} loaded={loaded} />
+        {/* laptop base */}
+        <div className="relative -mt-px h-3 w-[min(820px,96vw)] rounded-b-xl bg-gradient-to-b from-surface to-canvas-elevated shadow-[0_18px_30px_-16px_rgba(0,0,0,0.8)]">
+          <div className="absolute left-1/2 top-0 h-1.5 w-24 -translate-x-1/2 rounded-b-lg bg-canvas/80" />
+        </div>
+      </motion.div>
 
-        {/* scroll hint */}
-        {!pitchActive && (
-          <motion.div
-            style={{ opacity: hintOpacity }}
-            className="pointer-events-none absolute bottom-10 z-20 flex flex-col items-center gap-2 text-foreground-subtle"
-          >
-            <span className="font-mono text-xs uppercase tracking-wider">role para digitar o endereço</span>
-            <motion.span
-              animate={{ y: [0, 7, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="text-lg"
-            >
-              ↓
-            </motion.span>
-          </motion.div>
-        )}
-
-        {/* agency pitch — revealed by the resolved URL */}
-        <motion.div
-          style={{ opacity: pitchOpacity, y: pitchY, pointerEvents: pitchActive ? "auto" : "none" }}
-          className="absolute inset-0 z-20 flex items-center justify-center px-4 will-change-transform"
-        >
-          <AgencyPitch />
-        </motion.div>
-      </div>
+      {/* agency pitch — revealed by the resolved URL */}
+      <motion.div
+        initial={{ opacity: 0, y: 48 }}
+        animate={{ opacity: pitchActive ? 1 : 0, y: pitchActive ? 0 : 48 }}
+        transition={{ duration: 0.8, ease: EASE }}
+        style={{ pointerEvents: pitchActive ? "auto" : "none" }}
+        className="absolute inset-0 z-20 flex items-center justify-center px-4 will-change-transform"
+      >
+        <AgencyPitch />
+      </motion.div>
     </section>
   );
 }
