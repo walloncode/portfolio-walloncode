@@ -324,6 +324,12 @@ export function SkillsSection() {
   useEffect(() => {
     focusRef.current = focus;
   }, [focus]);
+  // hover-intent: leaving a card waits a beat before collapsing, so sliding
+  // straight onto the next card never dips through the empty (null) state.
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+  }, []);
 
   // Measure the width of one card set so the second copy can seamlessly wrap.
   useLayoutEffect(() => {
@@ -370,15 +376,25 @@ export function SkillsSection() {
   };
 
   const onCardEnter = (group: SkillGroup, index: number, e: React.MouseEvent) => {
+    // cancel any pending collapse — we're moving straight onto another card
+    if (leaveTimer.current) {
+      clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
     // freeze the loop and hide the original the instant it lifts out
     frozenRef.current = true;
     setHiddenTitle(group.title);
     setFocus({ group, index, rect: e.currentTarget.getBoundingClientRect() });
   };
   const onCardLeave = () => {
-    // start the collapse; the loop stays frozen and the original stays hidden
-    // until the clone finishes shrinking back (onExitComplete).
-    setFocus(null);
+    // Defer the collapse briefly. If the pointer lands on another card first,
+    // onCardEnter cancels this and the centered clone just swaps content —
+    // never dropping to null (which would replay a fly-back on every hop).
+    if (leaveTimer.current) clearTimeout(leaveTimer.current);
+    leaveTimer.current = setTimeout(() => {
+      leaveTimer.current = null;
+      setFocus(null);
+    }, 90);
   };
   const onFocusExited = () => {
     // Another card may have grabbed focus while this one was collapsing — in
@@ -491,23 +507,33 @@ export function SkillsSection() {
         </motion.div>
       </div>
 
-      {/* Focused card — flies out of the track to the center of the screen and
-          shrinks back on leave. Purely visual (the in-track slot keeps the
-          hover), so it never steals the pointer. */}
+      {/* Focused card — flies out of the track to the center of the screen once,
+          then just swaps its content when the pointer moves to another card, and
+          shrinks back only when the pointer leaves every card. Purely visual (the
+          in-track slot keeps the hover), so it never steals the pointer. */}
       <AnimatePresence onExitComplete={onFocusExited}>
         {focus && (
-          <div className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center px-4">
+          <motion.div
+            key="skills-focus"
+            className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center px-4"
+          >
             <motion.div
-              key={focus.group.title}
               style={{ width: overlayWidth }}
               initial={{ ...originTransform, opacity: 1 }}
               animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
               exit={{ ...originTransform, opacity: 1 }}
               transition={{ type: "spring", stiffness: 240, damping: 28, mass: 0.9 }}
             >
-              <GroupCard group={focus.group} index={focus.index} layout="grid" reveal={false} expanded />
+              <motion.div
+                key={focus.group.title}
+                initial={{ opacity: 0.4 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
+              >
+                <GroupCard group={focus.group} index={focus.index} layout="grid" reveal={false} expanded />
+              </motion.div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </section>
