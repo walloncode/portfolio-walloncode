@@ -1,5 +1,6 @@
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { Container } from "@/components/ui/container";
+import { AuroraBackground } from "@/components/ui/aurora-hero-bg";
 import { profile } from "@/content/profile";
 import { cn } from "@/lib/utils";
 import { About, STEPS, TAGS, GLASS, StepCard, type Step } from "@/components/sections/about";
@@ -63,8 +64,11 @@ function SceneCard({ step, delay }: { step: Step; delay: number }) {
  *  (staggered), then the copy, the tags, and finally the facts. */
 function AboutPortal() {
   return (
-    <section id="about" className="relative py-24 md:py-32">
-      <Container className="w-full">
+    <section id="about" className="relative overflow-hidden py-24 md:py-32">
+      {/* Aurora backdrop — sits behind the card, not inside it */}
+      <AuroraBackground className="opacity-35 [mask-image:radial-gradient(ellipse_at_center,black_55%,transparent_85%)]" />
+
+      <Container className="relative z-10 w-full">
         <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
           <motion.div
             variants={shell}
