@@ -4,7 +4,6 @@ import { IntroGate } from "@/components/sections/intro-gate";
 import { Hero } from "@/components/sections/hero";
 import { LogoMarquee } from "@/components/ui/logo-marquee";
 import { WorkFileManager } from "@/components/sections/work-file-manager";
-import { SelectedWork } from "@/components/sections/selected-work";
 import { WkSection } from "@/components/sections/wk-section";
 import { AboutParallax } from "@/components/sections/about-parallax";
 import { SkillsSection } from "@/components/sections/skills-section";
@@ -49,7 +48,6 @@ export function Home() {
       <Hero />
       <LogoMarquee />
       <WorkFileManager />
-      <SelectedWork />
       <WkSection />
       <AboutParallax />
       <SkillsSection />
