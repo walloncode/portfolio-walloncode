@@ -17,6 +17,8 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 const isMobileViewport = () =>
   typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches;
 
+type MarkState = "hidden" | "landed" | "static";
+
 interface Star {
   id: number;
   top: number;
@@ -42,6 +44,22 @@ function useStars(count: number): Star[] {
       })),
     [count],
   );
+}
+
+/** True once `ref` is within `margin` of the viewport, and false again when it
+ *  leaves — lets a section drop its heaviest DOM while it is far away. */
+function useNearViewport(ref: React.RefObject<HTMLElement | null>, margin = "50%") {
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setNear(e.isIntersecting), {
+      rootMargin: margin,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref, margin]);
+  return near;
 }
 
 function Starfield({ stars }: { stars: Star[] }) {
@@ -94,30 +112,85 @@ function Planet({ simplified }: { simplified?: boolean }) {
   );
 }
 
+const MARK_CLASS =
+  "size-[26vmin] max-w-none select-none mix-blend-screen will-change-transform [-webkit-mask-image:radial-gradient(circle,#000_56%,transparent_72%)] [mask-image:radial-gradient(circle,#000_56%,transparent_72%)]";
+
+const MARK_HIDDEN = { opacity: 0, scale: 0.3, y: "-42vh", rotate: -160 };
+const MARK_RESTING = { opacity: 1, scale: 1, y: "-8vh", rotate: 0 };
+
+/** The mark. Unlike the rest of the scene it is no longer scroll-driven: it
+ *  falls in on its own once the section pins, then hands off to an endless
+ *  float + spin. Everything stays on this one element — a transformed wrapper
+ *  would open a stacking context and strand the mix-blend-screen. */
+function CosmicMark({ state }: { state: MarkState }) {
+  const [floating, setFloating] = useState(false);
+
+  if (state === "static") {
+    return (
+      <img
+        src={wallonMark}
+        alt="walloncode"
+        className={MARK_CLASS}
+        style={{ transform: "translateY(-8vh)" }}
+        draggable={false}
+      />
+    );
+  }
+
+  return (
+    <motion.img
+      src={wallonMark}
+      alt="walloncode"
+      className={MARK_CLASS}
+      draggable={false}
+      initial={MARK_HIDDEN}
+      animate={
+        floating
+          ? { opacity: 1, scale: 1, y: ["-8vh", "-10.5vh", "-8vh"], rotate: [0, 360] }
+          : state === "landed"
+            ? MARK_RESTING
+            : MARK_HIDDEN
+      }
+      transition={
+        floating
+          ? {
+              y: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+              rotate: { duration: 22, repeat: Infinity, ease: "linear" },
+            }
+          : { duration: 1.5, ease: [0.16, 1, 0.3, 1] }
+      }
+      onAnimationComplete={() => state === "landed" && setFloating(true)}
+    />
+  );
+}
+
 /** Shared cosmic scene: starfield, planet, spinning mark, and headline.
  *  Motion values drive the scroll choreography; the static fallback passes
  *  fixed "resolved" values. */
 function CosmicScene({
   starsY,
   planetY,
-  markStyle,
+  markState,
   headline1Style,
   headline2Style,
+  starsMounted = true,
 }: {
   starsY?: MotionValue<string>;
   planetY?: MotionValue<string>;
-  markStyle: MotionStyle;
+  markState: MarkState;
   headline1Style: MotionStyle;
   headline2Style: MotionStyle;
+  starsMounted?: boolean;
 }) {
   const mobile = isMobileViewport();
   const stars = useStars(mobile ? 48 : 140);
 
   return (
     <>
-      {/* starfield */}
+      {/* starfield — every star is its own compositor layer running an infinite
+          twinkle, so it only exists while the section is anywhere near. */}
       <motion.div style={{ y: starsY }} className="pointer-events-none absolute inset-0">
-        <Starfield stars={stars} />
+        {starsMounted && <Starfield stars={stars} />}
       </motion.div>
 
       {/* nebula glow behind the mark */}
@@ -143,13 +216,7 @@ function CosmicScene({
           No z-index / isolation here: the mark's mix-blend-screen must blend
           against the planet + starfield backdrop to drop out its black. */}
       <div className="relative flex w-[min(1150px,92vw)] flex-col items-center px-6 text-center">
-        <motion.img
-          src={wallonMark}
-          alt="walloncode"
-          style={markStyle}
-          className="size-[26vmin] max-w-none select-none mix-blend-screen will-change-transform [-webkit-mask-image:radial-gradient(circle,#000_56%,transparent_72%)] [mask-image:radial-gradient(circle,#000_56%,transparent_72%)]"
-          draggable={false}
-        />
+        <CosmicMark state={markState} />
         {/* two-beat headline: the question, then the invitation. Both are
             absolutely stacked so they crossfade in the same spot. */}
         <div className="relative mt-6 w-full">
@@ -175,13 +242,17 @@ function CosmicScene({
 function CosmosPortal() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [headlineActive, setHeadlineActive] = useState(false);
+  const [markLanded, setMarkLanded] = useState(false);
+  const near = useNearViewport(sectionRef);
 
   // Manual, viewport-agnostic scroll progress (same approach as the other
   // sticky portals on this page).
   const scrollYProgress = useMotionValue(0);
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) return;
+    // While the section is far away its progress is pinned at an end value
+    // anyway — no reason to measure it on every scroll frame.
+    if (!el || !near) return;
     let raf = 0;
     const update = () => {
       raf = 0;
@@ -201,16 +272,14 @@ function CosmosPortal() {
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
     };
-  }, [scrollYProgress]);
+  }, [scrollYProgress, near]);
 
-  useMotionValueEvent(scrollYProgress, "change", (v) => setHeadlineActive(v > 0.5));
-
-  // The mark falls from the top while spinning and growing, then drifts up a
-  // touch to make room for the headline.
-  const markY = useTransform(scrollYProgress, [0, 0.5, 0.85], ["-54vh", "-4vh", "-11vh"]);
-  const markRotate = useTransform(scrollYProgress, [0, 0.5], [0, 720]);
-  const markScale = useTransform(scrollYProgress, [0, 0.5], [0.3, 1]);
-  const markOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    setHeadlineActive(v > 0.5);
+    // The mark's entrance fires once, as soon as the section pins — from there
+    // it animates on its own clock rather than following the scrollbar.
+    if (v > 0.02) setMarkLanded(true);
+  });
 
   // Two-beat headline: "Tem algo em mente?" rises first, then hands off to
   // "Então vamos conversar" with a brief crossfade.
@@ -231,7 +300,8 @@ function CosmosPortal() {
         <CosmicScene
           starsY={starsY}
           planetY={planetY}
-          markStyle={{ y: markY, rotate: markRotate, scale: markScale, opacity: markOpacity }}
+          markState={markLanded ? "landed" : "hidden"}
+          starsMounted={near}
           headline1Style={{ opacity: head1Opacity, y: head1Y }}
           headline2Style={{ opacity: head2Opacity, y: head2Y }}
         />
@@ -262,7 +332,7 @@ function CosmosStatic() {
   return (
     <section id="contact-intro" className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-canvas py-24">
       <CosmicScene
-        markStyle={{ opacity: 1 }}
+        markState="static"
         headline1Style={{ opacity: 0 }}
         headline2Style={{ opacity: 1 }}
       />
