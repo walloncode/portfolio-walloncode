@@ -38,6 +38,22 @@ export const fadeRight: Variants = {
   visible: { opacity: 1, x: 0, transition: springTransition },
 };
 
+/** Elastic Slide — sobe 40px de baixo, ultrapassa 6px o ponto final,
+ *  volta e para. O overshoot dá o "elástico". */
+export const elasticSlide: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: [40, -6, 0],
+    transition: {
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1],
+      times: [0, 0.72, 1],
+      opacity: { duration: 0.35, ease: "easeOut" },
+    },
+  },
+};
+
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
   visible: {
