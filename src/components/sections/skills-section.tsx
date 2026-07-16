@@ -316,6 +316,12 @@ export function SkillsSection() {
   } | null>(null);
   const [hiddenTitle, setHiddenTitle] = useState<string | null>(null);
   const frozenRef = useRef(false);
+  // mirror of `focus` for callbacks (AnimatePresence's onExitComplete) that fire
+  // outside React's render and must see the latest value.
+  const focusRef = useRef<typeof focus>(null);
+  useEffect(() => {
+    focusRef.current = focus;
+  }, [focus]);
 
   // Measure the width of one card set so the second copy can seamlessly wrap.
   useLayoutEffect(() => {
@@ -373,6 +379,12 @@ export function SkillsSection() {
     setFocus(null);
   };
   const onFocusExited = () => {
+    // Another card may have grabbed focus while this one was collapsing — in
+    // that case keep the loop frozen and hide the new card instead of resetting.
+    if (focusRef.current) {
+      setHiddenTitle(focusRef.current.group.title);
+      return;
+    }
     frozenRef.current = false;
     setHiddenTitle(null);
   };
