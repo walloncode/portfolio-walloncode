@@ -451,10 +451,17 @@ export function FloatingLines({
     }
 
     let raf = 0;
+    let running = false;
+    // Own accumulator instead of clock.getElapsedTime(): the loop pauses when
+    // the hero leaves the viewport, and a wall-clock elapsed time would snap
+    // the shader forward on resume. Clamping the delta also absorbs the long
+    // gap after a background tab comes back.
+    let elapsed = 0;
     const renderLoop = () => {
-      if (!active) return;
+      if (!running) return;
 
-      uniforms.iTime.value = clock.getElapsedTime();
+      elapsed += Math.min(clock.getDelta(), 1 / 30);
+      uniforms.iTime.value = elapsed;
 
       if (interactive) {
         currentMouseRef.current.lerp(targetMouseRef.current, mouseDamping);
@@ -472,12 +479,40 @@ export function FloatingLines({
       renderer.render(scene, camera);
       raf = requestAnimationFrame(renderLoop);
     };
-    renderLoop();
+
+    // Render only while the hero is both on screen and in a visible tab.
+    let onScreen = false;
+    const sync = () => {
+      const shouldRun = active && onScreen && !document.hidden;
+      if (shouldRun === running) return;
+      if (shouldRun) {
+        running = true;
+        clock.getDelta(); // drop the idle gap so `elapsed` stays continuous
+        renderLoop();
+      } else {
+        running = false;
+        cancelAnimationFrame(raf);
+      }
+    };
+
+    // The hero sits at the very top of a ~24k px page — without this the WebGL
+    // loop kept rendering at 60fps for the entire scroll down.
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        sync();
+      },
+      { threshold: 0 },
+    );
+    io.observe(container);
+
+    document.addEventListener("visibilitychange", sync);
 
     return () => {
       active = false;
-
-      cancelAnimationFrame(raf);
+      sync();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", sync);
 
       if (ro) ro.disconnect();
 
