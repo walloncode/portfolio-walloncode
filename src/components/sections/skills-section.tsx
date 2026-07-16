@@ -462,7 +462,12 @@ export function SkillsSection() {
 
         <motion.div
           style={{ opacity: trackOpacity }}
-          className="relative flex items-center gap-6 pl-6 md:gap-10 md:pl-10"
+          // Cards stay non-interactive until the intro has handed off — otherwise
+          // they can be hovered (and fly to center) while still faded in.
+          className={cn(
+            "relative flex items-center gap-6 pl-6 md:gap-10 md:pl-10",
+            introMounted ? "pointer-events-none" : "pointer-events-auto",
+          )}
         >
           {/* Heading panel — stays put; the intro "Skills" lands on it. */}
           <div className="flex w-[20rem] shrink-0 flex-col justify-center sm:w-[22rem]">
