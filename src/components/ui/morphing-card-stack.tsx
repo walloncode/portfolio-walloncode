@@ -135,10 +135,10 @@ export function MorphingCardStack({
               const stackStyle =
                 layout === "stack"
                   ? {
-                      top: card.stackPosition * 14,
-                      left: card.stackPosition * 10,
-                      rotate: card.stackPosition * -3,
-                      scale: 1 - card.stackPosition * 0.04,
+                      top: card.stackPosition * 26,
+                      left: card.stackPosition * 22,
+                      rotate: card.stackPosition * -4,
+                      scale: 1 - card.stackPosition * 0.05,
                       zIndex: STACK_DEPTH + 1 - card.stackPosition,
                     }
                   : { top: 0, left: 0, rotate: 0, scale: 1, zIndex: 1 };
