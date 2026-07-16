@@ -231,8 +231,9 @@ const LOOP_SPEED = 55;
 /** Within this distance (px) from the track the loop starts slowing down. */
 const PROXIMITY_RANGE = 280;
 /** Slowest the loop crawls while the mouse hovers the band (never fully stops
- *  until a card is hovered). */
-const MIN_FACTOR = 0.16;
+ *  until a card is hovered). Kept high enough that it still turns at a decent
+ *  pace when the pointer is near — only a hovered card brings it to a halt. */
+const MIN_FACTOR = 0.45;
 
 export function SkillsSection() {
   const prefersReducedMotion = useReducedMotion();
