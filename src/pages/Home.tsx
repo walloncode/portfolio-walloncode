@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { IntroGate } from "@/components/sections/intro-gate";
 import { Hero } from "@/components/sections/hero";
+import { LogoMarquee } from "@/components/ui/logo-marquee";
 import { WorkFileManager } from "@/components/sections/work-file-manager";
 import { SelectedWork } from "@/components/sections/selected-work";
 import { WkSection } from "@/components/sections/wk-section";
@@ -46,6 +47,7 @@ export function Home() {
       </Helmet>
 
       <Hero />
+      <LogoMarquee />
       <WorkFileManager />
       <SelectedWork />
       <WkSection />

@@ -146,6 +146,7 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .animate-\[marquee-x_38s_linear_infinite\],
+  .animate-\[marquee-x_32s_linear_infinite\],
   .animate-\[bh-spin_2\.4s_linear_infinite\] {
     animation: none;
   }
