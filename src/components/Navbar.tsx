@@ -16,7 +16,13 @@ const NAV_ITEMS = [
   { label: "GitHub", hash: "github" },
 ];
 
-const menuSpring = { type: "spring", stiffness: 420, damping: 34 } as const;
+// Softer, critically-damped spring — the expand/collapse glides open instead of
+// snapping, and settles without overshoot. `mass` slightly slows the tail so it
+// reads as fluid rather than abrupt.
+const menuSpring = { type: "spring", stiffness: 260, damping: 30, mass: 0.9 } as const;
+// Items fade/slide in on the same easing curve so the reveal moves as one piece
+// with the widening bar instead of popping in ahead of it.
+const revealEase = [0.16, 1, 0.3, 1] as const;
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -114,10 +120,11 @@ export function Navbar() {
             <motion.div
               key="items"
               layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.28, ease: revealEase }}
+              style={{ willChange: "transform, opacity" }}
               className="flex items-center gap-1 overflow-hidden pl-1"
             >
               <ul className="flex items-center gap-1">
@@ -178,7 +185,11 @@ export function Navbar() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              transition={{
+                height: { duration: 0.34, ease: revealEase },
+                opacity: { duration: 0.22, ease: "easeOut" },
+              }}
+              style={{ willChange: "height, opacity" }}
               className="overflow-hidden"
             >
               <motion.ul
