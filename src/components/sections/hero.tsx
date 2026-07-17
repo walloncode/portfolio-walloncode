@@ -1,9 +1,14 @@
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { Suspense, lazy, useEffect, useRef } from "react";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { FloatingLines } from "@/components/background/floating-lines";
 import { SplitText } from "@/components/ui/split-text";
+
+// Heavy WebGL (three) background — loaded off the critical path so the hero copy
+// and portrait paint immediately; the lines fade in a beat later, as before.
+const FloatingLines = lazy(() =>
+  import("@/components/background/floating-lines").then((m) => ({ default: m.FloatingLines })),
+);
 import { profile } from "@/content/profile";
 import portrait from "@/assets/portrait-cut.webp";
 
@@ -65,17 +70,19 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 -z-[1]"
         style={prefersReducedMotion ? undefined : { opacity: shaderOpacity }}
       >
-        <FloatingLines
-          className="pointer-events-auto h-full w-full"
-          enabledWaves={["top", "middle", "bottom"]}
-          lineCount={[10, 15, 20]}
-          lineDistance={[8, 6, 4]}
-          bendRadius={5}
-          bendStrength={-0.5}
-          interactive={!prefersReducedMotion}
-          parallax={!prefersReducedMotion}
-          animationSpeed={prefersReducedMotion ? 0 : 1}
-        />
+        <Suspense fallback={null}>
+          <FloatingLines
+            className="pointer-events-auto h-full w-full"
+            enabledWaves={["top", "middle", "bottom"]}
+            lineCount={[10, 15, 20]}
+            lineDistance={[8, 6, 4]}
+            bendRadius={5}
+            bendStrength={-0.5}
+            interactive={!prefersReducedMotion}
+            parallax={!prefersReducedMotion}
+            animationSpeed={prefersReducedMotion ? 0 : 1}
+          />
+        </Suspense>
         <div className="absolute inset-0 bg-[radial-gradient(120%_75%_at_50%_0%,transparent_45%,var(--color-canvas)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-canvas to-transparent" />
       </motion.div>

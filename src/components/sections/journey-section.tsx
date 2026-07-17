@@ -1,10 +1,16 @@
+import { Suspense, lazy } from "react";
 import { useReducedMotion } from "motion/react";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 import { AnimatedText } from "@/components/ui/animated-text";
-import { CelestialSphere } from "@/components/ui/celestial-sphere";
 import { OrbitalJourney } from "@/components/orbital-journey";
 import { journey } from "@/content/journey";
+
+// Heavy WebGL (three) nebula — below the fold, so load it lazily and keep three
+// out of the initial bundle.
+const CelestialSphere = lazy(() =>
+  import("@/components/ui/celestial-sphere").then((m) => ({ default: m.CelestialSphere })),
+);
 
 export function JourneySection() {
   const reduce = useReducedMotion();
@@ -13,13 +19,15 @@ export function JourneySection() {
       {/* Nebula backdrop — WebGL shader behind the orbital map */}
       <div aria-hidden="true" className="absolute inset-0 z-0">
         {!reduce && (
-          <CelestialSphere
-            hue={248}
-            speed={0.3}
-            zoom={1.3}
-            particleSize={3.2}
-            className="absolute inset-0 h-full w-full"
-          />
+          <Suspense fallback={null}>
+            <CelestialSphere
+              hue={248}
+              speed={0.3}
+              zoom={1.3}
+              particleSize={3.2}
+              className="absolute inset-0 h-full w-full"
+            />
+          </Suspense>
         )}
         {/* scrim keeps the copy readable, gradient blends into the sections
             above and below */}

@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { Helmet } from "react-helmet-async";
 import { IntroGate } from "@/components/sections/intro-gate";
 import { Hero } from "@/components/sections/hero";
 import { LogoMarquee } from "@/components/ui/logo-marquee";
-import PrismaticBurst from "@/components/ui/prismatic-burst";
 import { WorkFileManager } from "@/components/sections/work-file-manager";
+
+// Heavy ogl raymarch backdrop — deferred so its shader/code stays out of the
+// initial payload; it sits behind below-the-fold sections.
+const PrismaticBurst = lazy(() => import("@/components/ui/prismatic-burst"));
 import { WkSection } from "@/components/sections/wk-section";
 import { AboutParallax } from "@/components/sections/about-parallax";
 import { SkillsSection } from "@/components/sections/skills-section";
@@ -58,15 +61,17 @@ export function Home() {
             // Static stand-in for reduced-motion users — no WebGL, no animation
             <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_35%,rgba(77,61,255,0.18),transparent_70%)]" />
           ) : (
-            <PrismaticBurst
-              animationType="rotate3d"
-              intensity={1.8}
-              speed={0.5}
-              distort={1.0}
-              rayCount={24}
-              mixBlendMode="lighten"
-              colors={["#ff007a", "#4d3dff", "#ffffff"]}
-            />
+            <Suspense fallback={null}>
+              <PrismaticBurst
+                animationType="rotate3d"
+                intensity={1.8}
+                speed={0.5}
+                distort={1.0}
+                rayCount={24}
+                mixBlendMode="lighten"
+                colors={["#ff007a", "#4d3dff", "#ffffff"]}
+              />
+            </Suspense>
           )}
           {/* scrim keeps the marquee, copy and cards readable over the burst */}
           <div className="absolute inset-0 bg-canvas/55" />
