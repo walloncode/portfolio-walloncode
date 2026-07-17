@@ -32,20 +32,6 @@
   --color-accent-soft: rgba(91, 108, 255, 0.12);
   --color-accent-border: rgba(91, 108, 255, 0.32);
 
-  /* Metallic title fill — white blended with the indigo/violet accent, with a
-     crisp chrome highlight band around the middle. Shared by .title-std and the
-     JS heading styles so every title reads as the same brushed metal. */
-  --gradient-title-metallic: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #cdd3ff 24%,
-    #7c8bff 44%,
-    #ffffff 50%,
-    #5b6cff 58%,
-    #aab2ff 80%,
-    #ffffff 100%
-  );
-
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1.125rem;
@@ -93,26 +79,7 @@ body {
   font-size: 48px;
   line-height: 1.1;
   letter-spacing: -0.02em;
-  /* metallic white+violet fill; children inherit the transparent fill so split
-     letters pick up the same sheen */
-  background: var(--gradient-title-metallic);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
-}
-/* GSAP SplitText wraps each letter in its own (composited) layer, which can
-   drop the parent's text clip and leave letters invisible — so every split
-   piece carries the metallic fill itself. */
-.title-std .split-char,
-.title-std .split-word,
-.title-std .split-line {
-  background: var(--gradient-title-metallic);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: #ffffff;
 }
 .subtext-std {
   font-family: var(--font-sans);
