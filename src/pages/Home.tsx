@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useReducedMotion } from "motion/react";
 import { Helmet } from "react-helmet-async";
 import { IntroGate } from "@/components/sections/intro-gate";
 import { Hero } from "@/components/sections/hero";
@@ -21,6 +22,7 @@ const DESCRIPTION = profile.heroTagline;
 
 export function Home() {
   const [introDone, setIntroDone] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // The gate owns the viewport until it hands over — scrolling underneath it
   // would leave the visitor mid-page when the black hole opens.
@@ -52,15 +54,20 @@ export function Home() {
           section, behind the marquee and the card pile */}
       <div className="relative isolate">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-          <PrismaticBurst
-            animationType="rotate3d"
-            intensity={1.8}
-            speed={0.5}
-            distort={1.0}
-            rayCount={24}
-            mixBlendMode="lighten"
-            colors={["#ff007a", "#4d3dff", "#ffffff"]}
-          />
+          {prefersReducedMotion ? (
+            // Static stand-in for reduced-motion users — no WebGL, no animation
+            <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_35%,rgba(77,61,255,0.18),transparent_70%)]" />
+          ) : (
+            <PrismaticBurst
+              animationType="rotate3d"
+              intensity={1.8}
+              speed={0.5}
+              distort={1.0}
+              rayCount={24}
+              mixBlendMode="lighten"
+              colors={["#ff007a", "#4d3dff", "#ffffff"]}
+            />
+          )}
           {/* scrim keeps the marquee, copy and cards readable over the burst */}
           <div className="absolute inset-0 bg-canvas/55" />
         </div>

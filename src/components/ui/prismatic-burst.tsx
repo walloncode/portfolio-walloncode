@@ -255,7 +255,9 @@ export default function PrismaticBurst({
     const container = containerRef.current;
     if (!container) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // This is a heavy per-pixel raymarch (44 steps); a lower DPR cap trades a
+    // little sharpness for a big drop in shaded pixels on retina/mobile.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     const renderer = new Renderer({ dpr, alpha: false, antialias: false });
     rendererRef.current = renderer;
 
@@ -345,18 +347,20 @@ export default function PrismaticBurst({
 
     let raf = 0;
     let last = performance.now();
+    let lastRender = 0;
     let accumTime = 0;
+    // Ambient backdrop — 30fps is plenty and halves the GPU cost of the march.
+    const FRAME_MS = 1000 / 30;
 
     const update = (now: number) => {
+      raf = requestAnimationFrame(update);
       const dt = Math.max(0, now - last) * 0.001;
       last = now;
       const visible = isVisibleRef.current && !document.hidden;
       if (!pausedRef.current) accumTime += dt;
 
-      if (!visible) {
-        raf = requestAnimationFrame(update);
-        return;
-      }
+      if (!visible || now - lastRender < FRAME_MS) return;
+      lastRender = now;
 
       const tau = 0.02 + Math.max(0, Math.min(1, hoverDampRef.current)) * 0.5;
       const alpha = 1 - Math.exp(-dt / tau);
@@ -369,7 +373,6 @@ export default function PrismaticBurst({
       program.uniforms.uTime.value = accumTime;
 
       renderer.render({ scene: meshRef.current! });
-      raf = requestAnimationFrame(update);
     };
     raf = requestAnimationFrame(update);
 

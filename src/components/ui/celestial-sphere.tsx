@@ -33,6 +33,13 @@ export const CelestialSphere: React.FC<CelestialSphereProps> = ({
     let mesh: THREE.Mesh;
     let animationFrameId: number;
     const mouse = new THREE.Vector2(0.5, 0.5);
+    // Only render when the canvas is on screen and the tab is visible, throttled
+    // to ~30fps — this ambient nebula doesn't need 60, and it must not keep the
+    // GPU busy while the section is scrolled away.
+    let visible = true;
+    let last = 0;
+    let io: IntersectionObserver | null = null;
+    const FRAME_MS = 1000 / 30;
 
     // --- Shaders ---
     const vertexShader = `
@@ -121,8 +128,10 @@ export const CelestialSphere: React.FC<CelestialSphereProps> = ({
       scene = new THREE.Scene();
       camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio);
+      // No MSAA (a fullscreen fragment quad has no geometry edges to smooth) and
+      // a capped DPR keep the pixel count sane on retina/mobile.
+      renderer = new THREE.WebGLRenderer({ antialias: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
       currentMount.appendChild(renderer.domElement);
 
       material = new THREE.ShaderMaterial({
@@ -142,16 +151,34 @@ export const CelestialSphere: React.FC<CelestialSphereProps> = ({
       mesh = new THREE.Mesh(geometry, material);
       scene.add(mesh);
 
+      if ("IntersectionObserver" in window) {
+        io = new IntersectionObserver(
+          (entries) => {
+            if (entries[0]) visible = entries[0].isIntersecting;
+          },
+          { threshold: 0.01 },
+        );
+        io.observe(currentMount);
+      }
+
       addEventListeners();
       resize();
-      animate();
+      animate(0);
     };
 
-    // --- Animation Loop ---
-    const animate = () => {
-      material.uniforms.u_time.value += 0.005 * speed;
-      renderer.render(scene, camera);
+    // --- Animation Loop (throttled, paused when offscreen/hidden) ---
+    const animate = (now: number) => {
       animationFrameId = requestAnimationFrame(animate);
+      if (!visible || document.hidden) {
+        last = now;
+        return;
+      }
+      if (now - last < FRAME_MS) return;
+      // frame-rate-independent time step so the throttle doesn't slow the motion
+      const dt = Math.min((now - last) / 1000, 0.1);
+      last = now;
+      material.uniforms.u_time.value += dt * 0.3 * speed;
+      renderer.render(scene, camera);
     };
 
     // --- Event Handlers ---
@@ -184,6 +211,7 @@ export const CelestialSphere: React.FC<CelestialSphereProps> = ({
     // --- Cleanup ---
     return () => {
       removeEventListeners();
+      io?.disconnect();
       cancelAnimationFrame(animationFrameId);
       if (currentMount && renderer.domElement) {
         currentMount.removeChild(renderer.domElement);
