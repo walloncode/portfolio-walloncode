@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { About, STEPS, TAGS, GLASS, StepCard, type Step } from "@/components/sections/about";
 
 const HEADING_GRADIENT = {
-  backgroundImage: "linear-gradient(180deg, #ffffff 0%, #a3a3ad 100%)",
+  backgroundImage:
+    "linear-gradient(180deg, #ffffff 0%, #cdd3ff 24%, #7c8bff 44%, #ffffff 50%, #5b6cff 58%, #aab2ff 80%, #ffffff 100%)",
   WebkitBackgroundClip: "text",
   backgroundClip: "text",
   WebkitTextFillColor: "transparent",

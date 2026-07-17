@@ -132,7 +132,8 @@ export function About() {
                 <h2
                   className="font-display text-[2rem] font-bold leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem] md:text-[3rem]"
                   style={{
-                    backgroundImage: "linear-gradient(180deg, #ffffff 0%, #a3a3ad 100%)",
+                    backgroundImage:
+                      "linear-gradient(180deg, #ffffff 0%, #cdd3ff 24%, #7c8bff 44%, #ffffff 50%, #5b6cff 58%, #aab2ff 80%, #ffffff 100%)",
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     WebkitTextFillColor: "transparent",
