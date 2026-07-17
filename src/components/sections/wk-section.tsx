@@ -140,8 +140,8 @@ function WkPortal() {
   useEffect(() => {
     if (!inView) return;
     const controls = animate(charProgress, URL_TYPED.length, {
-      duration: 1.7,
-      delay: 0.4,
+      duration: 0.95,
+      delay: 0.2,
       ease: "linear",
     });
     return () => controls.stop();
@@ -150,14 +150,14 @@ function WkPortal() {
   // Beat 2 — the typed URL resolves and the page paints.
   useEffect(() => {
     if (typedCount < URL_TYPED.length) return;
-    const t = setTimeout(() => setLoaded(true), 380);
+    const t = setTimeout(() => setLoaded(true), 200);
     return () => clearTimeout(t);
   }, [typedCount]);
 
   // Beat 3 — the computer clears out and the pitch takes the stage.
   useEffect(() => {
     if (!loaded) return;
-    const t = setTimeout(() => setPitchActive(true), 1500);
+    const t = setTimeout(() => setPitchActive(true), 800);
     return () => clearTimeout(t);
   }, [loaded]);
 
@@ -177,7 +177,7 @@ function WkPortal() {
           scale: loaded ? 1.5 : 0.9,
           opacity: pitchActive ? 0.22 : loaded ? 0.6 : 0.35,
         }}
-        transition={{ duration: 1.2, ease: EASE }}
+        transition={{ duration: 0.7, ease: EASE }}
         className="pointer-events-none absolute size-[46vmin] rounded-full blur-[50px] sm:blur-[90px]"
       >
         <div className="size-full rounded-full bg-[radial-gradient(circle,rgba(91,108,255,0.85),rgba(124,92,255,0.2)_55%,transparent_72%)]" />
@@ -192,7 +192,7 @@ function WkPortal() {
           y: pitchActive ? -48 : 0,
           opacity: pitchActive ? 0 : 1,
         }}
-        transition={{ duration: 0.9, ease: EASE }}
+        transition={{ duration: 0.55, ease: EASE }}
         className="relative z-10 flex flex-col items-center will-change-transform"
       >
         <BrowserWindow typed={typed} loaded={loaded} />
@@ -206,7 +206,7 @@ function WkPortal() {
       <motion.div
         initial={{ opacity: 0, y: 48 }}
         animate={{ opacity: pitchActive ? 1 : 0, y: pitchActive ? 0 : 48 }}
-        transition={{ duration: 0.8, ease: EASE }}
+        transition={{ duration: 0.5, ease: EASE }}
         style={{ pointerEvents: pitchActive ? "auto" : "none" }}
         className="absolute inset-0 z-20 flex items-center justify-center px-4 will-change-transform"
       >
