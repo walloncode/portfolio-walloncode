@@ -14,7 +14,7 @@ export const profile = {
 
   aboutParagraphs: [
     "Wellyson desenvolve software full-stack com foco em sistemas que carregam decisão de arquitetura real: um SaaS multi-tenant para barbearias com isolamento de dados e proteção contra brute-force, um agente de automação que decide quando confiar em regras fixas e quando escalar para IA, uma plataforma de risco geoespacial construída em 48 horas de hackathon, e uma agência própria — WKCODE — que já entregou sites em produção para clientes reais, como a Kiuseven Energia Solar.",
-    "Cursa Análise e Desenvolvimento de Sistemas no IFRO, Campus Ariquemes, e mantém uma prática consistente nos próprios projetos: separar o que precisa ser determinístico do que realmente se beneficia de IA — e nunca confundir os dois.",
+    "Formou-se técnico em Informática pelo IFRO Ariquemes (2023–2025) e hoje cursa Análise e Desenvolvimento de Sistemas no mesmo campus. Mantém uma prática consistente nos próprios projetos — separar o que precisa ser determinístico do que realmente se beneficia de IA, e nunca confundir os dois — de olho numa carreira full-stack remota e internacional.",
   ],
 
   atAGlance: [

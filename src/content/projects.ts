@@ -270,6 +270,82 @@ export const projects: Project[] = [
     },
   },
   {
+    slug: "pulseid",
+    title: "PulseID",
+    tagline: "Sistema de identificação por RFID — leitura de cartões integrada a uma interface de gestão de identidades.",
+    year: "2025",
+    status: "Protótipo",
+    featured: false,
+    tech: ["RFID", "Integração de hardware", "Python"],
+    role: "Solo",
+    theme: "signal",
+    caseStudy: {
+      overview:
+        "PulseID é um sistema de identificação baseado em RFID: cartões são lidos por um leitor conectado ao computador e reconhecidos por uma aplicação que gerencia as identidades e registra as leituras. Foi o projeto em que Wellyson saiu do software puro para a integração com hardware.",
+      problem:
+        "Controlar identificação por cartão exige unir duas camadas que raramente conversam bem: a leitura física do RFID — sujeita a ruído, leituras repetidas e timing do leitor — e a lógica de negócio que decide o que cada identidade representa.",
+      solution:
+        "Uma aplicação que fala com o leitor RFID, traduz cada cartão lido em uma identidade cadastrada e expõe uma interface para gerenciar cartões, pessoas e o histórico de leituras — mantendo a camada de hardware separada da lógica de identificação.",
+      architecture:
+        "Leitor RFID conectado à máquina, uma camada que captura os eventos do dispositivo e normaliza as leituras, e uma aplicação com interface e persistência para o cadastro de identidades e o registro de cada leitura.",
+      stackDetail: [
+        { area: "Hardware", items: ["Leitor RFID", "Cartões RFID"] },
+        { area: "Software", items: ["Interface de gestão", "Lógica de identificação"] },
+        { area: "Dados", items: ["Cadastro de identidades", "Histórico de leituras"] },
+      ],
+      highlights: [
+        "Primeiro projeto integrando software e hardware, saindo da tela para o dispositivo físico",
+        "Separação clara entre a camada de leitura RFID e a lógica de identificação",
+        "Cadastro de identidades com histórico de cada leitura registrada",
+      ],
+      challenges:
+        "Lidar com a imprevisibilidade do hardware — leituras repetidas, ruído e timing do leitor — sem deixar isso vazar para a lógica de identificação foi o principal aprendizado do projeto.",
+      results:
+        "Protótipo demonstrando o fluxo completo: aproximar o cartão, reconhecer a identidade cadastrada e registrar a leitura.",
+      learnings:
+        "Integrar hardware ensina a projetar tolerância a falha desde o começo — o mundo físico não entrega eventos limpos como uma API.",
+    },
+  },
+  {
+    slug: "edsaas",
+    title: "EdSaaS",
+    tagline: "Plataforma educacional com correção automática e mapeamento das respostas às competências da BNCC via IA.",
+    year: "2025",
+    status: "Em desenvolvimento",
+    featured: false,
+    tech: ["Python", "OpenCV", "IA aplicada", "Leitura de PDF"],
+    role: "Solo",
+    theme: "grid",
+    caseStudy: {
+      overview:
+        "EdSaaS é uma plataforma educacional pensada para automatizar a correção de avaliações e relacionar cada resposta às competências da BNCC, usando visão computacional para ler as provas e IA para analisar o conteúdo.",
+      problem:
+        "Correção manual de avaliações consome o tempo do professor e raramente conecta o desempenho do aluno às competências da BNCC de forma estruturada — o dado existe, mas não vira diagnóstico.",
+      solution:
+        "Um fluxo que lê as provas (inclusive PDFs digitalizados) com visão computacional, corrige automaticamente e usa IA para mapear cada resposta às competências correspondentes da BNCC, gerando relatórios de desempenho por aluno e por competência.",
+      architecture:
+        "Pipeline de leitura com OpenCV para extrair as respostas das provas, uma camada de IA para analisar e classificar o conteúdo por competência da BNCC, e uma camada de relatórios que consolida o desempenho.",
+      stackDetail: [
+        { area: "Visão computacional", items: ["OpenCV", "Leitura de PDF"] },
+        { area: "IA", items: ["Análise de respostas", "Mapeamento à BNCC"] },
+        { area: "Backend", items: ["Python", "Automação de correção"] },
+        { area: "Saída", items: ["Relatórios por aluno e por competência"] },
+      ],
+      highlights: [
+        "Correção automática de avaliações a partir de provas digitalizadas",
+        "Mapeamento das respostas às competências da BNCC via IA",
+        "Leitura de PDF e visão computacional (OpenCV) para extrair as respostas",
+        "Relatórios de desempenho por aluno e por competência",
+      ],
+      challenges:
+        "O desafio central é confiar na automação sem abrir mão da revisão do professor: correção e classificação por IA precisam ser auditáveis, não uma caixa-preta que atribui competências sem explicar o porquê.",
+      results:
+        "Em desenvolvimento, com o escopo definido em torno de leitura de provas, correção automática e mapeamento à BNCC.",
+      learnings:
+        "Educação é um domínio onde IA opaca não serve: o valor está em explicar por que uma resposta mapeia para uma competência, não só em automatizar a nota.",
+    },
+  },
+  {
     slug: "agente-ixc",
     title: "Agente IXC",
     tagline: "Automação determinística do fluxo de NF-e no IXC — regras primeiro, IA só para exceções.",

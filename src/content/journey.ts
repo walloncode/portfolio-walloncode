@@ -27,8 +27,8 @@ export const journey: JourneyNode[] = [
     meta: "IFRO · ADS",
     category: "Base",
     content:
-      "Análise e Desenvolvimento de Sistemas no IFRO, Campus Ariquemes (RO). Base sólida em lógica, estruturas de dados e engenharia de software.",
-    tags: ["Fundamentos", "Engenharia de software"],
+      "Técnico em Informática integrado ao Ensino Médio no IFRO Ariquemes (2023–2025) e, na sequência, Análise e Desenvolvimento de Sistemas no mesmo campus. Base sólida em lógica, estruturas de dados, banco de dados e engenharia de software.",
+    tags: ["Fundamentos", "Banco de dados", "Engenharia de software"],
     icon: GraduationCap,
     relatedIds: [2, 3],
   },
@@ -38,8 +38,8 @@ export const journey: JourneyNode[] = [
     meta: "B2",
     category: "Idioma",
     content:
-      "Nível B2 em prática contínua — leitura de documentação técnica, código e conversação. Acesso direto à fonte, sem depender de tradução.",
-    tags: ["Leitura técnica", "Conversação"],
+      "Nível B2 em prática contínua — leitura de documentação técnica, código e conversação. Acesso direto à fonte, sem depender de tradução, mirando uma carreira remota e internacional.",
+    tags: ["Leitura técnica", "Conversação", "Carreira internacional"],
     icon: Languages,
     relatedIds: [1],
   },
