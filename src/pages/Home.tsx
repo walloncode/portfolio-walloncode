@@ -17,6 +17,7 @@ import { EnglishParallax } from "@/components/sections/english-parallax";
 import { GithubSection } from "@/components/sections/github-section";
 import { ContactCosmos } from "@/components/sections/contact-cosmos";
 import { Contact } from "@/components/sections/contact";
+import { ThankYou } from "@/components/sections/thank-you";
 import { ScrollAtmosphere } from "@/components/background/scroll-atmosphere";
 import { profile } from "@/content/profile";
 
@@ -104,6 +105,8 @@ export function Home() {
         <ContactCosmos />
         <Contact />
       </ScrollAtmosphere>
+
+      <ThankYou />
     </>
   );
 }
