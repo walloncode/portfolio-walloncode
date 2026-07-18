@@ -16,13 +16,13 @@ const NAV_ITEMS = [
   { label: "GitHub", hash: "github" },
 ];
 
-// Softer, critically-damped spring — the expand/collapse glides open instead of
-// snapping, and settles without overshoot. `mass` slightly slows the tail so it
-// reads as fluid rather than abrupt.
-const menuSpring = { type: "spring", stiffness: 260, damping: 30, mass: 0.9 } as const;
-// Items fade/slide in on the same easing curve so the reveal moves as one piece
-// with the widening bar instead of popping in ahead of it.
-const revealEase = [0.16, 1, 0.3, 1] as const;
+// Critically-damped glide (damping ratio ≈ 1): the bar opens and settles with no
+// overshoot and no snap. The whole menu — bar width and the items inside — shares
+// this one spring, so everything moves as a single fluid piece.
+const menuSpring = { type: "spring", stiffness: 220, damping: 30, mass: 1 } as const;
+// The item reveal rides the same spring for motion; only opacity is a short fade
+// so the content doesn't ghost ahead of the widening bar.
+const itemsTransition = { default: menuSpring, opacity: { duration: 0.18, ease: "easeOut" } } as const;
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -123,7 +123,7 @@ export function Navbar() {
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.28, ease: revealEase }}
+              transition={itemsTransition}
               style={{ willChange: "transform, opacity" }}
               className="flex items-center gap-1 overflow-hidden pl-1"
             >
@@ -186,8 +186,8 @@ export function Navbar() {
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{
-                height: { duration: 0.34, ease: revealEase },
-                opacity: { duration: 0.22, ease: "easeOut" },
+                height: menuSpring,
+                opacity: { duration: 0.2, ease: "easeOut" },
               }}
               style={{ willChange: "height, opacity" }}
               className="overflow-hidden"
