@@ -18,6 +18,8 @@ const THEME_BG: Record<ProjectTheme, string> = {
     "radial-gradient(125% 95% at 50% 6%, #072b41 0%, #04121f 52%, var(--color-canvas) 100%)",
   route:
     "radial-gradient(125% 95% at 50% 8%, #0d1533 0%, #070a1a 52%, var(--color-canvas) 100%)",
+  garage:
+    "radial-gradient(120% 92% at 50% 0%, #1b2450 0%, #0d1230 46%, #070a1a 74%, var(--color-canvas) 100%)",
   grid: "radial-gradient(125% 95% at 50% 8%, #170d2e 0%, #0a0716 52%, var(--color-canvas) 100%)",
   diner:
     "radial-gradient(120% 95% at 50% 6%, #21432e 0%, #14291c 46%, #0b1710 74%, var(--color-canvas) 100%)",
@@ -554,11 +556,157 @@ function DinerScene({ reduce }: { reduce: boolean | null }) {
   );
 }
 
+/* --------------------------------- garage --------------------------------- */
+
+// A single side-view car drawn in local coords (~248 wide), so the parent
+// <motion.g> owns its placement (translate/scale) and staged entrance.
+function Car({ color, glass = "#141b34" }: { color: string; glass?: string }) {
+  return (
+    <g>
+      {/* ground shadow */}
+      <ellipse cx="124" cy="98" rx="126" ry="12" fill="#000" opacity="0.4" />
+      {/* body */}
+      <path
+        d="M8,70 C6,52 16,48 34,46 L62,46 C80,26 110,20 140,20 L172,20 C196,20 214,32 228,50 L240,54 C250,58 252,66 250,76 L250,84 C250,90 246,92 240,92 L22,92 C12,92 6,84 8,70 Z"
+        fill={color}
+      />
+      {/* greenhouse / windows */}
+      <path d="M72,46 C86,30 110,26 138,26 L160,26 C180,26 196,34 208,46 Z" fill={glass} />
+      {/* door seam */}
+      <line x1="140" y1="30" x2="140" y2="88" stroke="#00000033" strokeWidth="2" />
+      {/* wheels */}
+      <g>
+        <circle cx="74" cy="92" r="19" fill="#0a0e1b" />
+        <circle cx="74" cy="92" r="8" fill="#333d5e" />
+        <circle cx="198" cy="92" r="19" fill="#0a0e1b" />
+        <circle cx="198" cy="92" r="8" fill="#333d5e" />
+      </g>
+      {/* headlight */}
+      <circle cx="246" cy="70" r="4" fill="#fff6cc" />
+    </g>
+  );
+}
+
+// Parked fleet — varied indigo tones and slight depth offsets so the row reads
+// as several vehicles bay-parked rather than one shape repeated.
+const GARAGE_CARS = [
+  { x: 20, y: 402, scale: 1.02, color: "#3c4a86" },
+  { x: 360, y: 420, scale: 1.16, color: "#5566c4" },
+  { x: 728, y: 406, scale: 1.06, color: "#2f3d72" },
+  { x: 1040, y: 424, scale: 1.2, color: "#46589f" },
+];
+
+// Overhead fluorescent light bars.
+const GARAGE_LIGHTS = [
+  { left: "20%", dur: 6 },
+  { left: "50%", dur: 7.5 },
+  { left: "80%", dur: 5 },
+];
+
+function GarageScene({ reduce }: { reduce: boolean | null }) {
+  return (
+    <>
+      {/* ceiling light bars, each casting a soft cone onto the floor */}
+      {GARAGE_LIGHTS.map((g, i) => (
+        <motion.div
+          key={i}
+          className="absolute top-0"
+          style={{ left: g.left, transform: "translateX(-50%)" }}
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 0.1 + i * 0.1, ease: EASE }}
+        >
+          <motion.div
+            className="h-2 w-28 rounded-full sm:w-40"
+            style={{ background: "#cfe0ff", boxShadow: "0 0 24px 6px rgba(160,190,255,0.6)" }}
+            animate={reduce ? undefined : { opacity: [0.75, 1, 0.85, 1] }}
+            transition={{ duration: g.dur, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <div
+            className="absolute left-1/2 top-2 -translate-x-1/2"
+            style={{
+              width: 260,
+              height: 340,
+              background:
+                "radial-gradient(60% 80% at 50% 0%, rgba(150,180,255,0.18), transparent 72%)",
+              filter: "blur(6px)",
+            }}
+          />
+        </motion.div>
+      ))}
+
+      {/* garage interior: back wall, roll-up door, floor + parking bays + fleet */}
+      <motion.svg
+        viewBox="0 0 1440 600"
+        preserveAspectRatio="xMidYMax slice"
+        className="absolute inset-x-0 bottom-0 h-[82%] w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.9, ease: EASE }}
+      >
+        <defs>
+          <linearGradient id="gg-floor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1a2143" />
+            <stop offset="100%" stopColor="#0a0e20" />
+          </linearGradient>
+          <linearGradient id="gg-door" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#232c52" />
+            <stop offset="100%" stopColor="#161d3a" />
+          </linearGradient>
+        </defs>
+
+        {/* floor plane */}
+        <rect x="0" y="470" width="1440" height="130" fill="url(#gg-floor)" />
+
+        {/* roll-up door on the back wall */}
+        <g opacity="0.55">
+          <rect x="470" y="250" width="500" height="220" rx="6" fill="url(#gg-door)" />
+          {Array.from({ length: 7 }).map((_, i) => (
+            <line
+              key={i}
+              x1="470"
+              x2="970"
+              y1={278 + i * 27}
+              y2={278 + i * 27}
+              stroke="#0b1024"
+              strokeWidth="3"
+            />
+          ))}
+        </g>
+
+        {/* perspective parking-bay stripes on the floor */}
+        <g stroke="#7f93d8" strokeWidth="3" opacity="0.3">
+          {[220, 560, 900, 1240].map((x, i) => (
+            <line key={i} x1={x} y1="472" x2={x + (x - 720) * 0.5} y2="600" />
+          ))}
+        </g>
+
+        {/* the parked fleet */}
+        {GARAGE_CARS.map((c, i) => (
+          <motion.g
+            key={i}
+            initial={
+              reduce
+                ? { opacity: 1, x: c.x, y: c.y, scale: c.scale }
+                : { opacity: 0, x: c.x, y: c.y + 70, scale: c.scale }
+            }
+            animate={{ opacity: 1, x: c.x, y: c.y, scale: c.scale }}
+            transition={{ duration: 1, delay: 0.25 + i * 0.14, ease: EASE }}
+          >
+            <Car color={c.color} />
+          </motion.g>
+        ))}
+      </motion.svg>
+    </>
+  );
+}
+
 const SCENES: Record<ProjectTheme, ComponentType<{ reduce: boolean | null }>> = {
   topography: RuralScene,
   diner: DinerScene,
   aurora: OceanScene,
   route: RouteScene,
+  garage: GarageScene,
   grid: GridScene,
   signal: SignalScene,
   solar: SolarScene,

@@ -25,6 +25,7 @@ export type ProjectStatus = "Em produção" | "Em desenvolvimento" | "Concluído
 export type ProjectTheme =
   | "topography"
   | "route"
+  | "garage"
   | "grid"
   | "diner"
   | "signal"
@@ -151,7 +152,7 @@ export const projects: Project[] = [
     demoUrl: "https://net-manager-five.vercel.app",
     isPrivateRepo: true,
     role: "Solo",
-    theme: "route",
+    theme: "garage",
     image: netmanagerDashboard,
     gallery: [netmanagerDashboard, netmanagerLogin],
     caseStudy: {

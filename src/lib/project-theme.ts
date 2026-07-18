@@ -36,8 +36,18 @@ const PALETTES: Record<ProjectTheme, AccentPalette> = {
     accentBorder: "rgba(1, 123, 61, 0.42)",
     foregroundSubtle: "#bfbfbf", // brand gray for meta/subtle copy
   },
-  // NetManager — route indigo/blue
+  // route indigo/blue
   route: {
+    accent: "#6d8bff",
+    accentHover: "#8ea6ff",
+    accentSolid: "#4f6bf0",
+    accentSolidHover: "#3f57cf",
+    accentForeground: "#ffffff",
+    accentSoft: "rgba(109, 139, 255, 0.13)",
+    accentBorder: "rgba(109, 139, 255, 0.34)",
+  },
+  // NetManager — garage indigo/blue (matches the fleet-garage scene)
+  garage: {
     accent: "#6d8bff",
     accentHover: "#8ea6ff",
     accentSolid: "#4f6bf0",
