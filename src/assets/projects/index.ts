@@ -15,3 +15,5 @@ export { default as wkcodeHero } from "./wkcode-hero.webp";
 export { default as bonaireLogin } from "./bonaire-login.webp";
 export { default as bonaireLogo } from "./bonaire-logo.webp";
 export { default as bonaireMenu } from "./bonaire-menu.webp";
+export { default as netmanagerDashboard } from "./netmanager-dashboard.webp";
+export { default as netmanagerLogin } from "./netmanager-login.webp";

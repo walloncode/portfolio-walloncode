@@ -16,6 +16,8 @@ import {
   bonaireLogin,
   bonaireMenu,
   bonaireLogo,
+  netmanagerDashboard,
+  netmanagerLogin,
 } from "@/assets/projects";
 
 export type ProjectStatus = "Em produção" | "Em desenvolvimento" | "Concluído" | "Protótipo";
@@ -150,6 +152,8 @@ export const projects: Project[] = [
     isPrivateRepo: true,
     role: "Solo",
     theme: "route",
+    image: netmanagerDashboard,
+    gallery: [netmanagerDashboard, netmanagerLogin],
     caseStudy: {
       overview:
         "Provedores de internet regionais operam com uma mistura de planilhas, grupos de WhatsApp e processos manuais para controlar técnicos em campo, estoque de equipamentos e a frota de veículos usada nas instalações. O NetManager centraliza essas três frentes — operação de campo, estoque e frota — em uma única plataforma, com dados em tempo real para quem gerencia.",
