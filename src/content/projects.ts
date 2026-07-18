@@ -18,6 +18,7 @@ import {
   bonaireLogo,
   netmanagerDashboard,
   netmanagerLogin,
+  edsaasLogin,
 } from "@/assets/projects";
 
 export type ProjectStatus = "Em produção" | "Em desenvolvimento" | "Concluído" | "Protótipo";
@@ -316,6 +317,8 @@ export const projects: Project[] = [
     tech: ["Python", "OpenCV", "IA aplicada", "Leitura de PDF"],
     role: "Solo",
     theme: "grid",
+    image: edsaasLogin,
+    gallery: [edsaasLogin],
     caseStudy: {
       overview:
         "EdSaaS é uma plataforma educacional pensada para automatizar a correção de avaliações e relacionar cada resposta às competências da BNCC, usando visão computacional para ler as provas e IA para analisar o conteúdo.",

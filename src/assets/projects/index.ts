@@ -17,3 +17,4 @@ export { default as bonaireLogo } from "./bonaire-logo.webp";
 export { default as bonaireMenu } from "./bonaire-menu.webp";
 export { default as netmanagerDashboard } from "./netmanager-dashboard.webp";
 export { default as netmanagerLogin } from "./netmanager-login.webp";
+export { default as edsaasLogin } from "./edsaas-login.webp";
