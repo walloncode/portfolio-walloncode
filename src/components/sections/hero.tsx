@@ -14,7 +14,7 @@ import portrait from "@/assets/portrait-cut.webp";
 
 const NAME = "Wellyson";
 
-export function Hero() {
+export function Hero({ introDone = false }: { introDone?: boolean }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -178,26 +178,45 @@ export function Hero() {
             style={prefersReducedMotion ? undefined : { y: portraitY }}
             className="pointer-events-none order-1 flex h-full items-end justify-center md:order-2 md:justify-end"
           >
-            {/* Dark photo underneath, full-colour copy on top revealed only
-                inside the cursor's radial mask. The shadow lives on the wrapper
-                so the dim filter can't replace it. */}
-            <div
-              ref={portraitRef}
-              className="portrait-spotlight relative drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
+            {/* Pendulum entrance: pivots from the top like a hanging photo and
+                swings in only after the intro gate hands over. The underdamped
+                spring lets it overshoot and settle instead of snapping to rest. */}
+            <motion.div
+              style={{ transformOrigin: "50% 0%" }}
+              initial={prefersReducedMotion ? false : { rotate: 16, opacity: 0 }}
+              animate={
+                prefersReducedMotion
+                  ? undefined
+                  : introDone
+                    ? { rotate: 0, opacity: 1 }
+                    : { rotate: 16, opacity: 0 }
+              }
+              transition={{
+                opacity: { duration: 0.45, ease: "easeOut", delay: 0.1 },
+                rotate: { type: "spring", stiffness: 45, damping: 5.5, mass: 1.1, delay: 0.1 },
+              }}
             >
-              <img
-                src={portrait}
-                alt="Wellyson Caetano"
-                fetchPriority="high"
-                className="portrait-base h-[52vh] max-h-[720px] w-auto object-contain object-bottom md:h-[76vh]"
-              />
-              <img
-                src={portrait}
-                alt=""
-                aria-hidden="true"
-                className="portrait-reveal absolute inset-0 h-full w-full object-contain object-bottom"
-              />
-            </div>
+              {/* Dark photo underneath, full-colour copy on top revealed only
+                  inside the cursor's radial mask. The shadow lives on the wrapper
+                  so the dim filter can't replace it. */}
+              <div
+                ref={portraitRef}
+                className="portrait-spotlight relative drop-shadow-[0_30px_60px_rgba(0,0,0,0.5)]"
+              >
+                <img
+                  src={portrait}
+                  alt="Wellyson Caetano"
+                  fetchPriority="high"
+                  className="portrait-base h-[52vh] max-h-[720px] w-auto object-contain object-bottom md:h-[76vh]"
+                />
+                <img
+                  src={portrait}
+                  alt=""
+                  aria-hidden="true"
+                  className="portrait-reveal absolute inset-0 h-full w-full object-contain object-bottom"
+                />
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </Container>

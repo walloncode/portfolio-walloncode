@@ -63,7 +63,7 @@ export function Home() {
         <meta property="og:type" content="website" />
       </Helmet>
 
-      <Hero />
+      <Hero introDone={introDone} />
 
       {/* Prismatic burst backdrop — spans from below the hero through the work
           section, behind the marquee and the card pile */}
