@@ -118,7 +118,7 @@ void main(){
       hoverMat = rotY(ang.y) * rotX(ang.x);
     }
 
-    for (int i = 0; i < 44; ++i) {
+    for (int i = 0; i < 26; ++i) {
         vec3 P = marchT * dir;
         P.z -= 2.0;
         float rad = length(P);
@@ -255,9 +255,10 @@ export default function PrismaticBurst({
     const container = containerRef.current;
     if (!container) return;
 
-    // This is a heavy per-pixel raymarch (44 steps); a lower DPR cap trades a
-    // little sharpness for a big drop in shaded pixels on retina/mobile.
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    // This is a heavy per-pixel raymarch (26 steps); the backdrop sits under a
+    // 55% scrim + lighten blend, so capping DPR at 1.0 drops the shaded-pixel
+    // count hard on retina/mobile with no visible loss through the scrim.
+    const dpr = Math.min(window.devicePixelRatio || 1, 1);
     const renderer = new Renderer({ dpr, alpha: false, antialias: false });
     rendererRef.current = renderer;
 

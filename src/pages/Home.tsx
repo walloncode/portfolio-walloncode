@@ -23,9 +23,21 @@ import { profile } from "@/content/profile";
 const TITLE = "Wellyson Caetano — Software Engineer";
 const DESCRIPTION = profile.heroTagline;
 
+/** Coarse pointer or few CPU cores ≈ a phone/low-power laptop, where the
+ *  full-viewport raymarch backdrop is what makes the work section stutter.
+ *  Detected once so those devices get the static gradient instead of WebGL. */
+function detectLowPower(): boolean {
+  if (typeof window === "undefined") return false;
+  const coarse = window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
+  const cores = navigator.hardwareConcurrency ?? 8;
+  return coarse || cores <= 4;
+}
+
 export function Home() {
   const [introDone, setIntroDone] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+  const [lowPower] = useState(detectLowPower);
+  const useStaticBackdrop = prefersReducedMotion || lowPower;
 
   // The gate owns the viewport until it hands over — scrolling underneath it
   // would leave the visitor mid-page when the black hole opens.
@@ -57,8 +69,8 @@ export function Home() {
           section, behind the marquee and the card pile */}
       <div className="relative isolate">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-          {prefersReducedMotion ? (
-            // Static stand-in for reduced-motion users — no WebGL, no animation
+          {useStaticBackdrop ? (
+            // Static stand-in for reduced-motion / low-power devices — no WebGL
             <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_35%,rgba(77,61,255,0.18),transparent_70%)]" />
           ) : (
             <Suspense fallback={null}>
