@@ -15,6 +15,8 @@ const cards: MorphCard[] = orderedProjects.map((p) => ({
   title: p.title,
   description: p.tagline,
   image: p.image,
+  // Fall back to the brand logo when a project has no screenshot cover.
+  logo: p.image ? undefined : p.brandLogo,
   meta: p.year,
   href: `/projects/${p.slug}`,
   badge: <StatusBadge status={p.status} />,

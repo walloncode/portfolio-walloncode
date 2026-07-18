@@ -16,8 +16,10 @@ export interface MorphCard {
   id: string;
   title: string;
   description: string;
-  /** Cover image. Falls back to a monogram tile when absent. */
+  /** Cover image (screenshot). Falls back to the logo, then a monogram tile. */
   image?: string;
+  /** Brand logo shown centered when there's no screenshot cover. */
+  logo?: string;
   /** Small pill rendered above the title (e.g. a status badge). */
   badge?: React.ReactNode;
   /** Short meta line shown next to the badge (e.g. the year). */
@@ -224,7 +226,7 @@ function CardFace({
     const body = (
       <div className="flex items-center gap-4 p-3">
         <div className="relative size-16 shrink-0 overflow-hidden rounded-[var(--radius-md)]">
-          <Cover image={card.image} monogram={monogram} />
+          <Cover image={card.image} logo={card.logo} monogram={monogram} />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -254,7 +256,7 @@ function CardFace({
   // Stack + grid: image cover with content anchored to the bottom.
   const overlay = (
     <>
-      <Cover image={card.image} monogram={monogram} />
+      <Cover image={card.image} logo={card.logo} monogram={monogram} />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 flex flex-col p-5">
         <div className="mb-2 flex items-center gap-2">
@@ -299,7 +301,7 @@ function CardFace({
   return <div className="relative h-full w-full select-none">{overlay}</div>;
 }
 
-function Cover({ image, monogram }: { image?: string; monogram: string }) {
+function Cover({ image, logo, monogram }: { image?: string; logo?: string; monogram: string }) {
   if (image) {
     return (
       <img
@@ -309,6 +311,23 @@ function Cover({ image, monogram }: { image?: string; monogram: string }) {
         loading="lazy"
         className="absolute inset-0 h-full w-full object-cover object-top"
       />
+    );
+  }
+  // No screenshot: show the brand logo contained (never cropped) over a themed
+  // backdrop, so logo-only projects (PulseID, Agente IXC) read as a brand card
+  // instead of a bare monogram.
+  if (logo) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-canvas-elevated">
+        <div className="absolute inset-0 bg-[radial-gradient(65%_60%_at_50%_42%,var(--color-accent-soft),transparent_72%)]" />
+        <img
+          src={logo}
+          alt=""
+          draggable={false}
+          loading="lazy"
+          className="relative max-h-[74%] max-w-[82%] object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.45)]"
+        />
+      </div>
     );
   }
   return (
