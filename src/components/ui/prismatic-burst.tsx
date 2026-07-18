@@ -118,7 +118,7 @@ void main(){
       hoverMat = rotY(ang.y) * rotX(ang.x);
     }
 
-    for (int i = 0; i < 26; ++i) {
+    for (int i = 0; i < 20; ++i) {
         vec3 P = marchT * dir;
         P.z -= 2.0;
         float rad = length(P);
@@ -216,6 +216,9 @@ export interface PrismaticBurstProps {
   hoverDampness?: number;
   rayCount?: number;
   mixBlendMode?: CSSProperties["mixBlendMode"] | "none";
+  /** Render the shader into a smaller backing store and let CSS scale it up.
+   *  0.5 = quarter the shaded pixels. Invisible under a blur/scrim. */
+  resolutionScale?: number;
   className?: string;
 }
 
@@ -230,6 +233,7 @@ export default function PrismaticBurst({
   hoverDampness = 0,
   rayCount,
   mixBlendMode = "lighten",
+  resolutionScale = 1,
   className,
 }: PrismaticBurstProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -311,10 +315,15 @@ export default function PrismaticBurst({
     triRef.current = triangle;
     meshRef.current = mesh;
 
+    const scale = Math.max(0.1, Math.min(resolutionScale || 1, 1));
     const resize = () => {
       const w = container.clientWidth || 1;
       const h = container.clientHeight || 1;
-      renderer.setSize(w, h);
+      // Backing store rendered at `scale`, then CSS-stretched to fill: the
+      // shader shades far fewer pixels while still covering the container.
+      renderer.setSize(Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale)));
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
       program.uniforms.uResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight];
     };
 

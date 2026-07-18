@@ -81,6 +81,7 @@ export function Home() {
                 distort={1.0}
                 rayCount={24}
                 mixBlendMode="lighten"
+                resolutionScale={0.5}
                 colors={["#ff007a", "#4d3dff", "#ffffff"]}
               />
             </Suspense>
