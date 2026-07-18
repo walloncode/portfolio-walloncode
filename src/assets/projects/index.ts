@@ -18,3 +18,5 @@ export { default as bonaireMenu } from "./bonaire-menu.webp";
 export { default as netmanagerDashboard } from "./netmanager-dashboard.webp";
 export { default as netmanagerLogin } from "./netmanager-login.webp";
 export { default as edsaasLogin } from "./edsaas-login.webp";
+export { default as pulseidLogo } from "./pulseid-logo.webp";
+export { default as ixcLogo } from "./ixc-logo.webp";

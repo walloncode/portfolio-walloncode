@@ -19,6 +19,8 @@ import {
   netmanagerDashboard,
   netmanagerLogin,
   edsaasLogin,
+  pulseidLogo,
+  ixcLogo,
 } from "@/assets/projects";
 
 export type ProjectStatus = "Em produção" | "Em desenvolvimento" | "Concluído" | "Protótipo";
@@ -280,6 +282,7 @@ export const projects: Project[] = [
     tech: ["RFID", "Integração de hardware", "Python"],
     role: "Solo",
     theme: "signal",
+    brandLogo: pulseidLogo,
     caseStudy: {
       overview:
         "PulseID é um sistema de identificação baseado em RFID: cartões são lidos por um leitor conectado ao computador e reconhecidos por uma aplicação que gerencia as identidades e registra as leituras. Foi o projeto em que Wellyson saiu do software puro para a integração com hardware.",
@@ -359,6 +362,7 @@ export const projects: Project[] = [
     githubUrl: "https://github.com/walloncode/bot-ixc",
     role: "Solo",
     theme: "signal",
+    brandLogo: ixcLogo,
     caseStudy: {
       overview:
         "O Agente IXC automatiza o fluxo de emissão de nota fiscal eletrônica (NF-e) dentro da plataforma de gestão IXC, usada por provedores de internet, substituindo um processo manual e repetitivo por um agente supervisionado.",
