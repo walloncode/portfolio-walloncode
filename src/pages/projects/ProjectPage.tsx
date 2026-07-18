@@ -15,6 +15,7 @@ import { ProjectCover } from "@/components/project-cover";
 import { ProjectGallery } from "@/components/project-gallery";
 import { StatusBadge } from "@/components/project-card";
 import { Reveal } from "@/components/ui/reveal";
+import { SplitText } from "@/components/ui/split-text";
 import { staggerContainer, fadeUp } from "@/lib/motion";
 import { NotFound } from "@/pages/NotFound";
 
@@ -88,12 +89,21 @@ export function ProjectPage() {
               />
             )}
 
-            <motion.h1
-              variants={fadeUp}
+            {/* key by slug so the char animation replays when navigating
+                between projects (the page itself doesn't remount) */}
+            <SplitText
+              key={project.slug}
+              tag="h1"
+              text={project.title}
               className="mt-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
-            >
-              {project.title}
-            </motion.h1>
+              splitType="chars"
+              delay={30}
+              duration={0.8}
+              from={{ opacity: 0, y: 40 }}
+              to={{ opacity: 1, y: 0 }}
+              textAlign="left"
+              playOnMount
+            />
 
             <motion.p variants={fadeUp} className="mt-4 max-w-2xl text-2xl font-normal leading-relaxed text-foreground-muted">
               {project.tagline}
