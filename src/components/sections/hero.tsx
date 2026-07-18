@@ -16,6 +16,9 @@ const NAME = "Wellyson";
 
 export function Hero({ introDone = false }: { introDone?: boolean }) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  // If the intro was already done on mount (returning to Home), skip the
+  // pendulum entrance and render the portrait already settled.
+  const introDoneOnMount = useRef(introDone);
   const portraitRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
@@ -183,7 +186,11 @@ export function Hero({ introDone = false }: { introDone?: boolean }) {
                 spring lets it overshoot and settle instead of snapping to rest. */}
             <motion.div
               style={{ transformOrigin: "50% 0%" }}
-              initial={prefersReducedMotion ? false : { rotate: 16, opacity: 0 }}
+              initial={
+                prefersReducedMotion || introDoneOnMount.current
+                  ? false
+                  : { rotate: 16, opacity: 0 }
+              }
               animate={
                 prefersReducedMotion
                   ? undefined

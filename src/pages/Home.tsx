@@ -34,8 +34,16 @@ function detectLowPower(): boolean {
   return coarse || cores <= 4;
 }
 
+const INTRO_SEEN_KEY = "introSeen";
+
 export function Home() {
-  const [introDone, setIntroDone] = useState(false);
+  // The intro gate plays once per browser session. Coming back to Home from a
+  // project page (which remounts this component) lands straight on the hero
+  // instead of replaying "Seja bem vindo".
+  const [introDone, setIntroDone] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return sessionStorage.getItem(INTRO_SEEN_KEY) === "1";
+  });
   const prefersReducedMotion = useReducedMotion();
   const [lowPower] = useState(detectLowPower);
   const useStaticBackdrop = prefersReducedMotion || lowPower;
@@ -54,7 +62,14 @@ export function Home() {
 
   return (
     <>
-      {!introDone && <IntroGate onFinish={() => setIntroDone(true)} />}
+      {!introDone && (
+        <IntroGate
+          onFinish={() => {
+            sessionStorage.setItem(INTRO_SEEN_KEY, "1");
+            setIntroDone(true);
+          }}
+        />
+      )}
 
       <Helmet>
         <title>{TITLE}</title>
